@@ -62,13 +62,36 @@ namespace WindMusicApp
             player.SetMusicPlayer(this.axWindowsMediaPlayer1);
             player.SetTimer(this.timerMusic);
 
-            //folder list
-            listViewFolder.Columns.Add("文件路径:");
+
             player.AddFolderEvent += new MusicEventAddFolderHandler(onAddFolderEvent);
+            player.RemoveFolderEvent += new MusicEventRemoveFolderHandler(onRemoveFolderEvent);
         }
         private void onAddFolderEvent(string folderName)
         {
-            listViewFolder.Items.Add(folderName);
+            ListViewItem lvi = new ListViewItem();
+            lvi.Text = folderName;
+            lvi.ImageKey = folderName;
+            listViewFolder.Items.Add(lvi);  
+        }
+
+        private void onRemoveFolderEvent(string folderName)
+        {
+            var items = listViewFolder.Items;
+            var removeIdx = -1;
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = items[i];
+                var name = item.Text;
+                if (folderName.CompareTo(name) == 0) {
+                    removeIdx = i;
+                    break;
+                }
+            }
+
+            if (removeIdx != -1)
+            {
+                listViewFolder.Items.RemoveAt(removeIdx);
+            }
         }
 
         private void BroadCastingMessage(string message)
@@ -191,57 +214,67 @@ namespace WindMusicApp
 
         private void listViewFolder_DragDrop(object sender, DragEventArgs e)
         {
-            // 返回插入标记的索引值  
-            int index = listViewFolder.InsertionMark.Index;
-            // 如果插入标记不可见，则退出.  
-            if (index == -1)
+            string fullPath = ((System.Array)e.Data.GetData(DataFormats.FileDrop)).GetValue(0).ToString();
+
+            if (System.IO.File.Exists(fullPath)) //如果是文件的话，则截取
             {
-                return;
+                string path = fullPath.Substring(0, fullPath.LastIndexOf("\\"));
+                player.AddMusicFolder(path);
             }
-            // 如果插入标记在项目的右面，使目标索引值加一  
-            if (listViewFolder.InsertionMark.AppearsAfterItem)
+            else
             {
-                index++;
+                player.AddMusicFolder(fullPath);
             }
 
-            // 返回拖拽项  
-            ListViewItem item = (ListViewItem)e.Data.GetData(typeof(ListViewItem));
-            //在目标索引位置插入一个拖拽项目的副本   
-            listViewFolder.Items.Insert(index, (ListViewItem)item.Clone());
-            // 移除拖拽项目的原文件  
-            listViewFolder.Items.Remove(item);  
         }
 
         private void listViewFolder_DragEnter(object sender, DragEventArgs e)
         {
-            e.Effect = e.AllowedEffect; 
+            //e.Effect = e.AllowedEffect; 
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Link;
+            else e.Effect = DragDropEffects.None; 
         }
 
         private void listViewFolder_DragLeave(object sender, EventArgs e)
         {
-            listViewFolder.InsertionMark.Index = -1;  
+            //listViewFolder.InsertionMark.Index = -1;  
         }
 
         private void listViewFolder_DragOver(object sender, DragEventArgs e)
         {
-            // 获得鼠标坐标  
-            Point point = listViewFolder.PointToClient(new Point(e.X, e.Y));
-            // 返回离鼠标最近的项目的索引  
-            int index = listViewFolder.InsertionMark.NearestIndex(point);
-            // 确定光标不在拖拽项目上  
-            if (index > -1)
+            //// 获得鼠标坐标  
+            //Point point = listViewFolder.PointToClient(new Point(e.X, e.Y));
+            //// 返回离鼠标最近的项目的索引  
+            //int index = listViewFolder.InsertionMark.NearestIndex(point);
+            //// 确定光标不在拖拽项目上  
+            //if (index > -1)
+            //{
+            //    Rectangle itemBounds = listViewFolder.GetItemRect(index);
+            //    if (point.X > itemBounds.Left + (itemBounds.Width / 2))
+            //    {
+            //        listViewFolder.InsertionMark.AppearsAfterItem = true;
+            //    }
+            //    else
+            //    {
+            //        listViewFolder.InsertionMark.AppearsAfterItem = false;
+            //    }
+            //}
+            //listViewFolder.InsertionMark.Index = index;  
+        }
+
+        private void buttonDelete_Click(object sender, EventArgs e)
+        {
+            var selectItems = listViewFolder.SelectedItems;
+            var count = selectItems.Count;
+            if (count > 0)
             {
-                Rectangle itemBounds = listViewFolder.GetItemRect(index);
-                if (point.X > itemBounds.Left + (itemBounds.Width / 2))
-                {
-                    listViewFolder.InsertionMark.AppearsAfterItem = true;
-                }
-                else
-                {
-                    listViewFolder.InsertionMark.AppearsAfterItem = false;
-                }
+                var selectItem = selectItems[0];
+                var text = selectItem.Text;
+                player.removeMusicFolder(text);
             }
-            listViewFolder.InsertionMark.Index = index;  
+            
+
         }
     }
 }

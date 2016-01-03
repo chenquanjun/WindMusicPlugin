@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 using System.Diagnostics;
+using System.IO;
 
 namespace WindMusicApp
 {
     public delegate void MusicEventAddFolderHandler(string folderName);
+    public delegate void MusicEventRemoveFolderHandler(string folderName);
         
     class MusicPlayer
     {
@@ -16,15 +18,25 @@ namespace WindMusicApp
         private AxWMPLib.AxWindowsMediaPlayer m_mediaPlayer = null;
         private System.Windows.Forms.Timer musicTimer = null;
         //private string[] musicFolderNames; 
-        ArrayList m_musicFolderNames;
+        ArrayList m_localMusicFolderNames;
+        ArrayList m_localMusicList;
+        Dictionary<string, bool> m_musicExtDic;
         public event MusicEventAddFolderHandler AddFolderEvent;
+        public event MusicEventRemoveFolderHandler RemoveFolderEvent;
+
 
         private void InitMusicPlayer()
         {
             m_mediaPlayer.settings.volume = m_defaultVolume; //读取配置表或者使用默认值35
             m_mediaPlayer.settings.autoStart = false;
 
-            m_musicFolderNames = new ArrayList();//读取保存的文件路径
+            m_localMusicFolderNames = new ArrayList();//读取保存的文件路径
+            m_localMusicList = new ArrayList();
+
+            m_musicExtDic = new Dictionary<string, bool>();
+            m_musicExtDic.Add(".mp3", true);
+            m_musicExtDic.Add(".wav", true);
+            m_musicExtDic.Add(".wma", true);
         }
 
         public void SetMusicPlayer(AxWMPLib.AxWindowsMediaPlayer player)
@@ -91,9 +103,9 @@ namespace WindMusicApp
         public bool AddMusicFolder(string folderName)
         {
             bool isOk = true;
-            for (int i = 0; i < m_musicFolderNames.Count; i++)
+            for (int i = 0; i < m_localMusicFolderNames.Count; i++)
             {
-                string tmpFolderName = m_musicFolderNames[i] as string;
+                string tmpFolderName = m_localMusicFolderNames[i] as string;
                 
                 if (tmpFolderName.CompareTo(folderName) == 0) {
                     isOk = false;
@@ -103,14 +115,52 @@ namespace WindMusicApp
 
             if (isOk)
             {
-                m_musicFolderNames.Add(folderName);
+                m_localMusicFolderNames.Add(folderName);
                 if (AddFolderEvent != null)
                 {
                     AddFolderEvent(folderName);
                 }
+
+                refreshLocalMusicList(); //刷新音乐列表
             }
 
             return isOk;
         }
+
+        public bool removeMusicFolder(string folderName)
+        {
+            m_localMusicFolderNames.Remove(folderName);
+            if (RemoveFolderEvent != null)
+            {
+                RemoveFolderEvent(folderName);
+            }
+
+            refreshLocalMusicList(); //刷新音乐列表
+            return true;
+        }
+
+        private void refreshLocalMusicList()
+        {
+            m_localMusicList.Clear();
+
+            for (int i = 0; i < m_localMusicFolderNames.Count; i++)
+            {
+                string tmpFolderName = m_localMusicFolderNames[i] as string;
+                DirectoryInfo dir = new DirectoryInfo(tmpFolderName);
+                FileInfo[] inf = dir.GetFiles();
+                foreach (FileInfo finf in inf)
+                {
+                    var fileExt = finf.Extension;
+
+                    if (m_musicExtDic.ContainsKey(fileExt))
+                    {
+                        m_localMusicList.Add(finf.FullName);
+
+                        Console.WriteLine(finf.FullName);
+                    }
+                }
+            } 
+        }
+
     }
 }

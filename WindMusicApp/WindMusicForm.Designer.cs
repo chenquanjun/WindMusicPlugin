@@ -36,6 +36,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.timerMusic = new System.Windows.Forms.Timer(this.components);
             this.listViewFolder = new System.Windows.Forms.ListView();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.buttonAdd = new System.Windows.Forms.Button();
             this.buttonDelete = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.axWindowsMediaPlayer1)).BeginInit();
@@ -75,15 +76,23 @@
             // listViewFolder
             // 
             this.listViewFolder.AllowDrop = true;
+            this.listViewFolder.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1});
+            this.listViewFolder.HideSelection = false;
             resources.ApplyResources(this.listViewFolder, "listViewFolder");
             this.listViewFolder.Name = "listViewFolder";
             this.listViewFolder.UseCompatibleStateImageBehavior = false;
+            this.listViewFolder.View = System.Windows.Forms.View.Details;
             this.listViewFolder.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.listViewFolder_ItemDrag);
             this.listViewFolder.SelectedIndexChanged += new System.EventHandler(this.listViewFolder_SelectedIndexChanged);
             this.listViewFolder.DragDrop += new System.Windows.Forms.DragEventHandler(this.listViewFolder_DragDrop);
             this.listViewFolder.DragEnter += new System.Windows.Forms.DragEventHandler(this.listViewFolder_DragEnter);
             this.listViewFolder.DragOver += new System.Windows.Forms.DragEventHandler(this.listViewFolder_DragOver);
             this.listViewFolder.DragLeave += new System.EventHandler(this.listViewFolder_DragLeave);
+            // 
+            // columnHeader1
+            // 
+            resources.ApplyResources(this.columnHeader1, "columnHeader1");
             // 
             // buttonAdd
             // 
@@ -97,6 +106,7 @@
             resources.ApplyResources(this.buttonDelete, "buttonDelete");
             this.buttonDelete.Name = "buttonDelete";
             this.buttonDelete.UseVisualStyleBackColor = true;
+            this.buttonDelete.Click += new System.EventHandler(this.buttonDelete_Click);
             // 
             // WindMusicForm
             // 
@@ -129,6 +139,7 @@
         private System.Windows.Forms.ListView listViewFolder;
         private System.Windows.Forms.Button buttonAdd;
         private System.Windows.Forms.Button buttonDelete;
+        private System.Windows.Forms.ColumnHeader columnHeader1;
     }
 }
 
