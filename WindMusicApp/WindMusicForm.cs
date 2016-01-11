@@ -26,6 +26,8 @@ namespace WindMusicApp
         private EventWrapper wrapper = null;
         private MusicPlayer player = null;
 
+        HttpProc.WebClient m_httpClient = null;
+
         public WindMusicForm()
         {
             InitializeComponent();
@@ -58,14 +60,33 @@ namespace WindMusicApp
 
             }
 
+            //music player
             player = new MusicPlayer();
             player.SetMusicPlayer(this.axWindowsMediaPlayer1);
             player.SetTimer(this.timerMusic);
 
-
+            //player event handler
             player.AddFolderEvent += new MusicEventAddFolderHandler(onAddFolderEvent);
             player.RemoveFolderEvent += new MusicEventRemoveFolderHandler(onRemoveFolderEvent);
+
+            //button state
+            buttonDelete.Enabled = false; 
+
+            //download
+            m_httpClient = new HttpProc.WebClient();
+            m_httpClient.Encoding = System.Text.Encoding.Default;//默认编码方式，根据需要设置其他类型  
+
+            m_httpClient.DownloadProgressChanged += new HttpProc.WebClientDownloadEvent(onDownloadEvent);
         }
+        private void onDownloadEvent(object sender, HttpProc.DownloadEventArgs e)
+        {
+            var bytesReceived = e.bytesReceived;
+            var totalBytes = e.totalBytes;
+            var ReceiveProgress = e.ReceiveProgress;
+
+            progressLabel.Text = "下载进度：" + bytesReceived + "/" + totalBytes;
+        }
+
         private void onAddFolderEvent(string folderName)
         {
             ListViewItem lvi = new ListViewItem();
@@ -194,6 +215,8 @@ namespace WindMusicApp
         private void listViewFolder_SelectedIndexChanged(object sender, EventArgs e)
         {
 
+            var focusedItem = listViewFolder.FocusedItem;
+            buttonDelete.Enabled = focusedItem.Selected;
         }
 
         private void listViewFolder_ItemDrag(object sender, ItemDragEventArgs e)
@@ -238,29 +261,12 @@ namespace WindMusicApp
 
         private void listViewFolder_DragLeave(object sender, EventArgs e)
         {
-            //listViewFolder.InsertionMark.Index = -1;  
+
         }
 
         private void listViewFolder_DragOver(object sender, DragEventArgs e)
         {
-            //// 获得鼠标坐标  
-            //Point point = listViewFolder.PointToClient(new Point(e.X, e.Y));
-            //// 返回离鼠标最近的项目的索引  
-            //int index = listViewFolder.InsertionMark.NearestIndex(point);
-            //// 确定光标不在拖拽项目上  
-            //if (index > -1)
-            //{
-            //    Rectangle itemBounds = listViewFolder.GetItemRect(index);
-            //    if (point.X > itemBounds.Left + (itemBounds.Width / 2))
-            //    {
-            //        listViewFolder.InsertionMark.AppearsAfterItem = true;
-            //    }
-            //    else
-            //    {
-            //        listViewFolder.InsertionMark.AppearsAfterItem = false;
-            //    }
-            //}
-            //listViewFolder.InsertionMark.Index = index;  
+
         }
 
         private void buttonDelete_Click(object sender, EventArgs e)
@@ -273,8 +279,30 @@ namespace WindMusicApp
                 var text = selectItem.Text;
                 player.removeMusicFolder(text);
             }
-            
+            buttonDelete.Enabled = false;
 
+        }
+
+        private void progressLabel_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonSearch_Click(object sender, EventArgs e)
+        {
+            var text = textBox1.Text;
+            var url = "http://music.163.com/search/";
+            var postData = "s=" + text + "&offset=0&limit=10&type=1";
+            m_httpClient.OpenRead(url, postData);
+
+
+            Debug.WriteLine(m_httpClient.RespHtml);
+        }
+
+        private void buttonDownload_Click(object sender, EventArgs e)
+        {
+            var text = textBox1.Text;
+            m_httpClient.DownloadFile(text, @"C:\Users\efgame\Desktop\test.txt");
         }
     }
 }

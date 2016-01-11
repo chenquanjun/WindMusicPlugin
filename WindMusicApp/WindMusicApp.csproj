@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MusicPlayer.cs" />
+    <Compile Include="HttpProc.cs" />
     <Compile Include="WindMusicForm.cs">
       <SubType>Form</SubType>
     </Compile>

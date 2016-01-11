@@ -39,6 +39,9 @@
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.buttonAdd = new System.Windows.Forms.Button();
             this.buttonDelete = new System.Windows.Forms.Button();
+            this.progressLabel = new System.Windows.Forms.Label();
+            this.buttonSearch = new System.Windows.Forms.Button();
+            this.buttonDownload = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.axWindowsMediaPlayer1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -108,10 +111,33 @@
             this.buttonDelete.UseVisualStyleBackColor = true;
             this.buttonDelete.Click += new System.EventHandler(this.buttonDelete_Click);
             // 
+            // progressLabel
+            // 
+            resources.ApplyResources(this.progressLabel, "progressLabel");
+            this.progressLabel.Name = "progressLabel";
+            this.progressLabel.Click += new System.EventHandler(this.progressLabel_Click);
+            // 
+            // buttonSearch
+            // 
+            resources.ApplyResources(this.buttonSearch, "buttonSearch");
+            this.buttonSearch.Name = "buttonSearch";
+            this.buttonSearch.UseVisualStyleBackColor = true;
+            this.buttonSearch.Click += new System.EventHandler(this.buttonSearch_Click);
+            // 
+            // buttonDownload
+            // 
+            resources.ApplyResources(this.buttonDownload, "buttonDownload");
+            this.buttonDownload.Name = "buttonDownload";
+            this.buttonDownload.UseVisualStyleBackColor = true;
+            this.buttonDownload.Click += new System.EventHandler(this.buttonDownload_Click);
+            // 
             // WindMusicForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.buttonDownload);
+            this.Controls.Add(this.buttonSearch);
+            this.Controls.Add(this.progressLabel);
             this.Controls.Add(this.buttonDelete);
             this.Controls.Add(this.buttonAdd);
             this.Controls.Add(this.listViewFolder);
@@ -140,6 +166,9 @@
         private System.Windows.Forms.Button buttonAdd;
         private System.Windows.Forms.Button buttonDelete;
         private System.Windows.Forms.ColumnHeader columnHeader1;
+        private System.Windows.Forms.Label progressLabel;
+        private System.Windows.Forms.Button buttonSearch;
+        private System.Windows.Forms.Button buttonDownload;
     }
 }
 
