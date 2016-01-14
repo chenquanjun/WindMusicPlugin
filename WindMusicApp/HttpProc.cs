@@ -10,7 +10,9 @@ using RE = System.Text.RegularExpressions.Regex;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Authentication;
 using System.Net.Security;
-
+using System.Runtime.Serialization.Json;
+using System.Runtime.Serialization;
+using System.Diagnostics;
 /***************************************************************************************************************************************************  
  * *文件名：HttpProc.cs  
  * *创建人：kenter  
@@ -93,6 +95,58 @@ namespace HttpProc
         public double receiveSpeed;
     }
 
+    [DataContract]
+    public class Items
+    {
+        [DataMember]
+        public List<result> result { get; set; }
+        public Items()
+        {
+            result = new List<result>();
+        }
+
+        //把字符串转换为对象
+        public static Items FormJson(string json)
+        {
+            try
+            {
+                System.Runtime.Serialization.Json.DataContractJsonSerializer a = new System.Runtime.Serialization.Json.DataContractJsonSerializer(typeof(Items));
+                using (MemoryStream stream = new MemoryStream(Encoding.Unicode.GetBytes(json)))
+                {
+                    return (Items)a.ReadObject(stream);
+                }
+            }
+            catch (Exception)
+            {
+
+                return null;
+            }
+        }
+    }
+
+    [DataContract]
+    public class result
+    {
+        [DataMember]
+        public int songCount { get; set; }
+        [DataMember]
+        public List<songs> songs { get; set; }
+    }
+
+    /*
+       简单的对象
+    */
+    [DataContract]
+    public class songs
+    {
+        [DataMember]
+        public int id { get; set; }
+        [DataMember]
+        public string name { get; set; }
+        [DataMember]
+        public int duration { get; set; }
+    }
+
     ///<summary>  
     ///实现向WEB服务器发送和接收数据  
     ///</summary>  
@@ -101,7 +155,7 @@ namespace HttpProc
         private WebHeaderCollection requestHeaders, responseHeaders;
         private TcpClient clientSocket;
         private MemoryStream postStream;
-        private Encoding encoding = Encoding.Default;
+        private Encoding encoding = Encoding.UTF8;
         private const string BOUNDARY = "--HEDAODE--";
         private const int SEND_BUFFER_SIZE = 10245;
         private const int RECEIVE_BUFFER_SIZE = 10245;
@@ -123,70 +177,10 @@ namespace HttpProc
             requestHeaders = new WebHeaderCollection();
         }
 
-        /// <summary>  
-        /// 获得字符串中开始和结束字符串中间得值  
-        /// </summary>  
-        /// <param name="str"></param>  
-        /// <param name="s">开始</param>  
-        /// <param name="e">结束</param>  
-        /// <returns></returns>  
-        public string gethtmlContent(string str, string s, string e)
+
+        public void addHeader(string name, string value)
         {
-            Regex rg = new Regex("(?<=(" + s + "))[.\\s\\S]*?(?=(" + e + "))", RegexOptions.Multiline | RegexOptions.Singleline);
-            return rg.Match(str).Value;
-        }
-
-        /// <summary>  
-        /// 过滤HTML字符  
-        /// </summary>  
-        /// <param name="source"></param>  
-        /// <returns></returns>  
-        public string htmlConvert(string source)
-        {
-            string result;
-
-            //remove line breaks,tabs  
-            result = source.Replace("\r", " ");
-            result = result.Replace("\n", " ");
-            result = result.Replace("\t", " ");
-
-            //remove the header  
-            result = Regex.Replace(result, "(<head>).*(</head>)", string.Empty, RegexOptions.IgnoreCase);
-
-            result = Regex.Replace(result, @"<( )*script([^>])*>", "<script>", RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, @"(<script>).*(</script>)", string.Empty, RegexOptions.IgnoreCase);
-
-            //remove all styles  
-            result = Regex.Replace(result, @"<( )*style([^>])*>", "<style>", RegexOptions.IgnoreCase); //clearing attributes  
-            result = Regex.Replace(result, "(<style>).*(</style>)", string.Empty, RegexOptions.IgnoreCase);
-
-            //insert tabs in spaces of <td> tags  
-            result = Regex.Replace(result, @"<( )*td([^>])*>", " ", RegexOptions.IgnoreCase);
-
-            //insert line breaks in places of <br> and <li> tags  
-            result = Regex.Replace(result, @"<( )*br( )*>", "\r", RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, @"<( )*li( )*>", "\r", RegexOptions.IgnoreCase);
-
-            //insert line paragraphs in places of <tr> and <p> tags  
-            result = Regex.Replace(result, @"<( )*tr([^>])*>", "\r\r", RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, @"<( )*p([^>])*>", "\r\r", RegexOptions.IgnoreCase);
-
-            //remove anything thats enclosed inside < >  
-            result = Regex.Replace(result, @"<[^>]*>", string.Empty, RegexOptions.IgnoreCase);
-
-            //replace special characters:  
-            result = Regex.Replace(result, @"&amp;", "&", RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, @"&nbsp;", " ", RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, @"&lt;", "<", RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, @"&gt;", ">", RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, @"&(.{2,6});", string.Empty, RegexOptions.IgnoreCase);
-
-            //remove extra line breaks and tabs  
-            result = Regex.Replace(result, @" ( )+", " ");
-            result = Regex.Replace(result, "(\r)( )+(\r)", "\r\r");
-            result = Regex.Replace(result, @"(\r\r)+", "\r\n");
-
-            return result;
+            requestHeaders.Add(name, value);
         }
 
         ///<summary>  
@@ -201,48 +195,6 @@ namespace HttpProc
             return GetHtml();
         }
 
-
-        //解决证书过期无法访问的问题 1.0 
-        //class CertPolicy : ICertificatePolicy
-        //{
-        //    public bool CheckValidationResult(ServicePoint srvpt, X509Certificate cert, WebRequest req, int certprb)
-        //    { return true; }
-        //}
-
-        public bool CheckValidationResult(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
-        {   //   Always   accept   
-            return true;
-        }
-
-        ///<summary>  
-        ///采用https协议访问网络  
-        ///</summary>  
-        ///<param name="URL">url地址</param>  
-        ///<param name="strPostdata">发送的数据</param>  
-        ///<returns></returns>  
-        public string OpenReadWithHttps(string URL, string strPostdata)
-        {
-            //ServicePointManager.CertificatePolicy = new CertPolicy(); //1.0
-            ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(CheckValidationResult);
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL);
-            request.CookieContainer = new CookieContainer();
-            request.Method = "POST";
-            request.Accept = "*/*";
-            request.ContentType = "application/x-www-form-urlencoded";
-            byte[] buffer = this.encoding.GetBytes(strPostdata);
-            request.ContentLength = buffer.Length;
-            request.GetRequestStream().Write(buffer, 0, buffer.Length);
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            StreamReader reader = new StreamReader(response.GetResponseStream(), encoding);
-            this.respHtml = reader.ReadToEnd();
-            foreach (System.Net.Cookie ck in response.Cookies)
-            {
-                this.cookie += ck.Name + "=" + ck.Value + ";";
-            }
-            reader.Close();
-            return respHtml;
-        }
-
         ///<summary>  
         ///读取指定URL的文本  
         ///</summary>  
@@ -255,164 +207,17 @@ namespace HttpProc
             postStream = new MemoryStream();
             postStream.Write(sendBytes, 0, sendBytes.Length);
 
+            requestHeaders.Add("Accept", "*/*");
+            requestHeaders.Add("Accept-Encoding", "gzip,deflate,sdch");
+            requestHeaders.Add("Accept-Language", "zh-CN,zh;q=0.8,gl;q=0.4");
+            requestHeaders.Add("Cookie", "appver=1.5.0.75771;");
+            requestHeaders.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36");
             requestHeaders.Add("Content-Length", postStream.Length.ToString());
             requestHeaders.Add("Content-Type", "application/x-www-form-urlencoded");
             requestHeaders.Add("Connection", "close");
 
             SendRequestData(URL, "POST");
             return GetHtml();
-        }
-
-
-        ///<summary>  
-        ///读取指定URL的流  
-        ///</summary>  
-        ///<param name="URL">请求的地址</param>  
-        ///<param name="postData">向服务器发送的数据</param>  
-        ///<returns>服务器响应流</returns>  
-        public Stream GetStream(string URL, string postData)
-        {
-            byte[] sendBytes = encoding.GetBytes(postData);
-            postStream = new MemoryStream();
-            postStream.Write(sendBytes, 0, sendBytes.Length);
-
-            requestHeaders.Add("Content-Length", postStream.Length.ToString());
-            requestHeaders.Add("Content-Type", "application/x-www-form-urlencoded");
-            requestHeaders.Add("Connection", "close");
-
-            SendRequestData(URL, "POST");
-
-            MemoryStream ms = new MemoryStream();
-            SaveNetworkStream(ms);
-            return ms;
-        }
-
-
-        ///<summary>  
-        ///上传文件到服务器  
-        ///</summary>  
-        ///<param name="URL">请求的地址</param>  
-        ///<param name="fileField">文件域(格式如:file1=C:\test.mp3&file2=C:\test.jpg)</param>  
-        ///<returns>服务器响应文本</returns>  
-        public string UploadFile(string URL, string fileField)
-        {
-            return UploadFile(URL, "", fileField);
-        }
-
-        ///<summary>  
-        ///上传文件和数据到服务器  
-        ///</summary>  
-        ///<param name="URL">请求地址</param>  
-        ///<param name="textField">文本域(格式为:name1=value1&name2=value2)</param>  
-        ///<param name="fileField">文件域(格式如:file1=C:\test.mp3&file2=C:\test.jpg)</param>  
-        ///<returns>服务器响应文本</returns>  
-        public string UploadFile(string URL, string textField, string fileField)
-        {
-            postStream = new MemoryStream();
-
-            if (textField != "" && fileField != "")
-            {
-                WriteTextField(textField);
-                WriteFileField(fileField);
-            }
-            else if (fileField != "")
-            {
-                WriteFileField(fileField);
-            }
-            else if (textField != "")
-            {
-                WriteTextField(textField);
-            }
-            else
-                throw new Exception("文本域和文件域不能同时为空。");
-
-            //写入结束标记  
-            byte[] buffer = encoding.GetBytes("--" + BOUNDARY + "--\r\n");
-            postStream.Write(buffer, 0, buffer.Length);
-
-            //添加请求标头  
-            requestHeaders.Add("Content-Length", postStream.Length.ToString());
-            requestHeaders.Add("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
-            requestHeaders.Add("Connection", "Keep-Alive");
-
-            //发送请求数据  
-            SendRequestData(URL, "POST", true);
-
-            //返回响应文本  
-            return GetHtml();
-        }
-
-
-        ///<summary>  
-        ///分析文本域，添加到请求流  
-        ///</summary>  
-        ///<param name="textField">文本域</param>  
-        private void WriteTextField(string textField)
-        {
-            string[] strArr = RE.Split(textField, "&");
-            textField = "";
-            foreach (string var in strArr)
-            {
-                Match M = RE.Match(var, "([^=]+)=(.+)");
-                textField += "--" + BOUNDARY + "\r\n";
-                textField += "Content-Disposition: form-data; name=\"" + M.Groups[1].Value + "\"\r\n\r\n" + M.Groups[2].Value + "\r\n";
-            }
-            byte[] buffer = encoding.GetBytes(textField);
-            postStream.Write(buffer, 0, buffer.Length);
-        }
-
-        ///<summary>  
-        ///分析文件域，添加到请求流  
-        ///</summary>  
-        ///<param name="fileField">文件域</param>  
-        private void WriteFileField(string fileField)
-        {
-            string filePath = "";
-            int count = 0;
-            string[] strArr = RE.Split(fileField, "&");
-            foreach (string var in strArr)
-            {
-                Match M = RE.Match(var, "([^=]+)=(.+)");
-                filePath = M.Groups[2].Value;
-                fileField = "--" + BOUNDARY + "\r\n";
-                fileField += "Content-Disposition: form-data; name=\"" + M.Groups[1].Value + "\"; filename=\"" + Path.GetFileName(filePath) + "\"\r\n";
-                fileField += "Content-Type: image/jpeg\r\n\r\n";
-
-                byte[] buffer = encoding.GetBytes(fileField);
-                postStream.Write(buffer, 0, buffer.Length);
-
-                //添加文件数据  
-                FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                buffer = new byte[50000];
-
-                do
-                {
-                    count = fs.Read(buffer, 0, buffer.Length);
-                    postStream.Write(buffer, 0, count);
-
-                } while (count > 0);
-
-                fs.Close();
-                fs.Dispose();
-                fs = null;
-
-                buffer = encoding.GetBytes("\r\n");
-                postStream.Write(buffer, 0, buffer.Length);
-            }
-        }
-
-        ///<summary>  
-        ///从指定URL下载数据流  
-        ///</summary>  
-        ///<param name="URL">请求地址</param>  
-        ///<returns>数据流</returns>  
-        public Stream DownloadData(string URL)
-        {
-            requestHeaders.Add("Connection", "close");
-            SendRequestData(URL, "GET");
-            MemoryStream ms = new MemoryStream();
-            SaveNetworkStream(ms, true);
-            return ms;
         }
 
 
@@ -444,6 +249,9 @@ namespace HttpProc
             clientSocket.Connect(URI.Host, URI.Port);
 
             requestHeaders.Add("Host", URI.Host);
+
+            Debug.WriteLine(requestHeaders);
+
             byte[] request = GetRequestHeaders(method + " " + URI.PathAndQuery + " HTTP/1.1");
             clientSocket.Client.Send(request);
 
@@ -509,10 +317,6 @@ namespace HttpProc
         ///<returns>请求头字节数组</returns>  
         private byte[] GetRequestHeaders(string request)
         {
-            requestHeaders.Add("Accept", "*/*");
-            requestHeaders.Add("Accept-Language", "zh-cn");
-            requestHeaders.Add("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)");
-
             string headers = request + "\r\n";
 
             foreach (string key in requestHeaders)
@@ -530,8 +334,6 @@ namespace HttpProc
             requestHeaders.Clear();
             return encoding.GetBytes(headers);
         }
-
-
 
         ///<summary>  
         ///获取服务器响应文本  
@@ -563,11 +365,36 @@ namespace HttpProc
             MemoryStream ms = new MemoryStream();
             for (int i = 0; i < 3; i++)
             {
-                count = NetStream.Read(buffer, 0, 500);
-                ms.Write(buffer, 0, count);
+                try
+                {
+                    count = NetStream.Read(buffer, 0, 500);
+                    ms.Write(buffer, 0, count);
+                }
+                catch (Exception pExc)
+                {
+                    ms.Flush();
+                    Debug.WriteLine("远程服务器断开");
+                    break;
+                }
             }
 
-            if (ms.Length == 0) { NetStream.Close(); throw new Exception("远程服务器没有响应"); }
+            if (ms.Length == 0) { 
+                NetStream.Close(); 
+                //throw new Exception("远程服务器没有响应");
+                Debug.WriteLine("远程服务器没有响应");
+
+                if (showProgress)
+                {
+                    DownloadEventArgs error = new DownloadEventArgs();
+
+                    error.totalBytes = -1;
+                    error.bytesReceived = -1;
+                    error.receiveSpeed = -1;
+                    if (DownloadProgressChanged != null) { DownloadProgressChanged(this, error); }
+                }
+
+                return;
+            }
 
             buffer = ms.GetBuffer();
             count = (int)ms.Length;
@@ -622,11 +449,11 @@ namespace HttpProc
             {
                 toStream.SetLength(long.Parse(responseHeaders["Content-Length"]));
             }
-            //else  
-            //{  
-            // toStream.SetLength(toStream.Length);  
-            // responseHeaders.Add("Content-Length", toStream.Length.ToString());//添加响应标头  
-            //}  
+            else  
+            {  
+                toStream.SetLength(toStream.Length);  
+                responseHeaders.Add("Content-Length", toStream.Length.ToString());//添加响应标头  
+            }  
 
             toStream.Position = 0;
 
@@ -644,8 +471,6 @@ namespace HttpProc
         {
             SaveNetworkStream(toStream, false);
         }
-
-
 
         ///<summary>  
         ///分析响应流，去掉响应头  
@@ -735,7 +560,6 @@ namespace HttpProc
             //实体开始索引  
             startIndex = encoding.GetBytes(strResponseHeaders).Length;
         }
-
 
         ///<summary>  
         ///取消上传或下载,要继续开始请调用Start方法  
