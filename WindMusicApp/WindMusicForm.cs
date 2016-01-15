@@ -17,8 +17,6 @@ using System.Runtime.Remoting.Channels.Http;
 using System.Diagnostics;
 
 using Wayfarer.BroadCast.Common;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace WindMusicApp
 {
@@ -27,8 +25,7 @@ namespace WindMusicApp
         private IBroadCast watch = null;
         private EventWrapper wrapper = null;
         private MusicPlayer player = null;
-
-        HttpProc.WebClient m_httpClient = null;
+        private SearchHelper searchHelper = null;
 
         public WindMusicForm()
         {
@@ -37,6 +34,7 @@ namespace WindMusicApp
 
         private void WindMisicForm_Load(object sender, EventArgs e)
         {
+            /*
             try
             {
                 BinaryServerFormatterSinkProvider serverProvider = new BinaryServerFormatterSinkProvider();
@@ -61,6 +59,7 @@ namespace WindMusicApp
             {
 
             }
+            */
 
             //music player
             player = new MusicPlayer();
@@ -71,23 +70,13 @@ namespace WindMusicApp
             player.AddFolderEvent += new MusicEventAddFolderHandler(onAddFolderEvent);
             player.RemoveFolderEvent += new MusicEventRemoveFolderHandler(onRemoveFolderEvent);
 
+            searchHelper = new SearchHelper();
+
             //button state
             buttonDelete.Enabled = false; 
 
-            //download
-            m_httpClient = new HttpProc.WebClient();
-            m_httpClient.Encoding = System.Text.Encoding.Default;//默认编码方式，根据需要设置其他类型  
-
-            m_httpClient.DownloadProgressChanged += new HttpProc.WebClientDownloadEvent(onDownloadEvent);
         }
-        private void onDownloadEvent(object sender, HttpProc.DownloadEventArgs e)
-        {
-            var bytesReceived = e.bytesReceived;
-            var totalBytes = e.totalBytes;
-            var ReceiveProgress = e.ReceiveProgress;
 
-            progressLabel.Text = "下载进度：" + bytesReceived + "/" + totalBytes;
-        }
 
         private void onAddFolderEvent(string folderName)
         {
@@ -293,33 +282,34 @@ namespace WindMusicApp
         private void buttonSearch_Click(object sender, EventArgs e)
         {
             var text = textBox1.Text;
-            var url = "http://music.163.com/weapi/search/suggest/web";
-            var paramStr = "LvlhBrKbbzdX6CaQ81VdKAtcdBU0l6KEMGxV9wSf7ARvYwPH2v4KZPiBksb8W09/PNAEe+QMCTWW9gfcCCQF8Rz2E1B/ZoVHq91its7dQpY6+hR2hngsgXLZDFpT3fQdphpT9/0lV6EviaM0k+IaeA==";
-            var encSecKey = "b13b7663b9a535a3f5f5a0445d72b74656ab0371750396890288366cb673fc826ecd23a16a63fca80ecc672144fc33f67ab9ac705bcb0efab66b82821f1fb348b78a116228580950ebccf97dd5d3db455b3cb4a0e60fd1cf892930cb2a8236dbae10b2a5e82b707fe65ec76dab75e0f459650a9b415817047b0b25757fb59dee";
-            var postData = "params=" + paramStr + "&encSecKey=" + encSecKey;
+            //var url = "http://music.163.com/weapi/search/suggest/web";
+            //var paramStr = "LvlhBrKbbzdX6CaQ81VdKAtcdBU0l6KEMGxV9wSf7ARvYwPH2v4KZPiBksb8W09/PNAEe+QMCTWW9gfcCCQF8Rz2E1B/ZoVHq91its7dQpY6+hR2hngsgXLZDFpT3fQdphpT9/0lV6EviaM0k+IaeA==";
+            //var encSecKey = "b13b7663b9a535a3f5f5a0445d72b74656ab0371750396890288366cb673fc826ecd23a16a63fca80ecc672144fc33f67ab9ac705bcb0efab66b82821f1fb348b78a116228580950ebccf97dd5d3db455b3cb4a0e60fd1cf892930cb2a8236dbae10b2a5e82b707fe65ec76dab75e0f459650a9b415817047b0b25757fb59dee";
+            //var postData = "params=" + paramStr + "&encSecKey=" + encSecKey;
 
-            //var url = "http://music.163.com/api/search/get/web";
+            var url = "http://music.163.com/api/search/get/web";
             //var url = "http://127.0.0.1:12321/";
-            //var postData = "limit=10&s=Avril&total=true&type=1&offset=0";
+            var postData = "limit=1&s=test&total=true&type=1&offset=0";
 
-            m_httpClient.addHeader("Referer", "http://music.163.com/search/");
-            
-            var respone = m_httpClient.OpenRead(url, postData);
+            //m_httpClient.Referer = "http://music.163.com/search/";
 
-            Debug.WriteLine(m_httpClient.ResponseHeaders);
+            //m_httpClient.Post(url, postData);
+
+            //m_httpClient.Get("http://baidu.com");
 
             //UTF8Encoding utf8 = new UTF8Encoding();
             //Byte[] encodedBytes = utf8.GetBytes(m_httpClient.RespHtml);
             //String decodedString = utf8.GetString(encodedBytes);
 
-            //JObject jo = (JObject)JsonConvert.DeserializeObject("{" + m_httpClient.RespHtml + "}");
-            Debug.WriteLine(respone);
+            //JObject jo = (JObject)JsonConvert.DeserializeObject(respone);
+
+            searchHelper.search(text);
         }
 
         private void buttonDownload_Click(object sender, EventArgs e)
         {
             var text = textBox1.Text;
-            m_httpClient.DownloadFile(text, @"C:\Users\efgame\Desktop\test.txt");
+            
         }
     }
 }

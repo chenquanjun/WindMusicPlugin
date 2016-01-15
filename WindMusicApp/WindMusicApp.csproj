@@ -70,7 +70,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MusicPlayer.cs" />
-    <Compile Include="HttpProc.cs" />
+    <Compile Include="HttpHelper.cs" />
+    <Compile Include="SearchHelper.cs" />
     <Compile Include="WindMusicForm.cs">
       <SubType>Form</SubType>
     </Compile>
