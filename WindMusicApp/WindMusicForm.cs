@@ -282,28 +282,7 @@ namespace WindMusicApp
         private void buttonSearch_Click(object sender, EventArgs e)
         {
             var text = textBox1.Text;
-            //var url = "http://music.163.com/weapi/search/suggest/web";
-            //var paramStr = "LvlhBrKbbzdX6CaQ81VdKAtcdBU0l6KEMGxV9wSf7ARvYwPH2v4KZPiBksb8W09/PNAEe+QMCTWW9gfcCCQF8Rz2E1B/ZoVHq91its7dQpY6+hR2hngsgXLZDFpT3fQdphpT9/0lV6EviaM0k+IaeA==";
-            //var encSecKey = "b13b7663b9a535a3f5f5a0445d72b74656ab0371750396890288366cb673fc826ecd23a16a63fca80ecc672144fc33f67ab9ac705bcb0efab66b82821f1fb348b78a116228580950ebccf97dd5d3db455b3cb4a0e60fd1cf892930cb2a8236dbae10b2a5e82b707fe65ec76dab75e0f459650a9b415817047b0b25757fb59dee";
-            //var postData = "params=" + paramStr + "&encSecKey=" + encSecKey;
-
-            var url = "http://music.163.com/api/search/get/web";
-            //var url = "http://127.0.0.1:12321/";
-            var postData = "limit=1&s=test&total=true&type=1&offset=0";
-
-            //m_httpClient.Referer = "http://music.163.com/search/";
-
-            //m_httpClient.Post(url, postData);
-
-            //m_httpClient.Get("http://baidu.com");
-
-            //UTF8Encoding utf8 = new UTF8Encoding();
-            //Byte[] encodedBytes = utf8.GetBytes(m_httpClient.RespHtml);
-            //String decodedString = utf8.GetString(encodedBytes);
-
-            //JObject jo = (JObject)JsonConvert.DeserializeObject(respone);
-
-            searchHelper.search(text);
+            searchHelper.downloadSongList(text);
         }
 
         private void buttonDownload_Click(object sender, EventArgs e)

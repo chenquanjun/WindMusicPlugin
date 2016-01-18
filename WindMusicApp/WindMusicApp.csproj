@@ -69,9 +69,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JsonHelper.cs" />
     <Compile Include="MusicPlayer.cs" />
     <Compile Include="HttpHelper.cs" />
     <Compile Include="SearchHelper.cs" />
+    <Compile Include="Util.cs" />
     <Compile Include="WindMusicForm.cs">
       <SubType>Form</SubType>
     </Compile>

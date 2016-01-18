@@ -10,8 +10,8 @@ using RE = System.Text.RegularExpressions.Regex;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Authentication;
 using System.Net.Security;
-using System.Runtime.Serialization.Json;
-using System.Runtime.Serialization;
+//using System.Runtime.Serialization.Json;
+//using System.Runtime.Serialization;
 using System.Diagnostics;
 using System.IO.Compression;
 
@@ -19,20 +19,17 @@ namespace WindMusicApp
 {
     public delegate void WebClientDownloadEvent(object sender, DownloadEventArgs e);
 
-    ///<summary>  
-    ///下载事件参数  
-    ///</summary>  
     public struct DownloadEventArgs
     {
         public string result;
-        public int requestId;
+        public UInt32 requestId;
 
     }
 
     public class WebAsyncObject
     {
         public HttpWebRequest request { get; set; }
-        public int requestId { get; set; }
+        public UInt32 requestId { get; set; }
 
         public WebClient webClient { get; set; }
     } 
@@ -46,8 +43,8 @@ namespace WindMusicApp
 
         private string referer = ""; //http://music.163.com/search/
         private int timeout = 10000; //ms
-        private string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36"; 
-        private int requestIdOrder = 0;
+        private string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
+        
         ///<summary>  
         ///初始化WebClient类  
         ///</summary>  
@@ -83,16 +80,10 @@ namespace WindMusicApp
             return req;
         }
 
-        private int genRequestId(){
-            var requestId = requestIdOrder;
-            requestIdOrder += 1;
-            return requestId;
-        }
 
-        public int Get(string url)
+
+        public void Get(string url, UInt32 requestId)
         {
-            var requestId = genRequestId();
-
             HttpWebRequest req = CreateRequest(url, "GET");
 
             WebAsyncObject webObject = new WebAsyncObject();
@@ -102,13 +93,10 @@ namespace WindMusicApp
 
             req.BeginGetResponse(new AsyncCallback(OnResponse), webObject);
 
-            return requestId;
         }
 
-        public int Post(string url, string postData)
+        public void Post(string url, string postData, UInt32 requestId)
         {
-            var requestId = genRequestId();
-
             HttpWebRequest req = CreateRequest(url, "POST");
             byte[] bs = Encoding.ASCII.GetBytes(postData);
             req.ContentType = "application/x-www-form-urlencoded";
@@ -132,8 +120,6 @@ namespace WindMusicApp
             webObject.webClient = this;
 
             req.BeginGetResponse(new AsyncCallback(OnResponse), webObject);
-
-            return requestId;
         }
 
         static void OnResponse(IAsyncResult ar)
