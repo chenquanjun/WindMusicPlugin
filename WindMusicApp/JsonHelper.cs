@@ -11,6 +11,7 @@ namespace WindMusicApp
     [System.Flags]
     public enum QualityType
     {
+        Invalid = 0,
         H = 1,  //001
         M = 2,  //010
         L = 4,  //100
@@ -23,7 +24,7 @@ namespace WindMusicApp
         public string Extension { get; set; }
         public int Bitrate { get; set; }
 
-        public string Dfsid { get; set; }
+        public string DfsId { get; set; }
 
         public SongQuality(JObject jo)
         {
@@ -40,14 +41,14 @@ namespace WindMusicApp
             Bitrate = bitrate;
 
             Extension = jo["extension"].ToString();
-            Dfsid = jo["dfsid"].ToString();
+            DfsId = jo["dfsId"].ToString();
         }
 
         public static QualityType isQualityExist(JObject jo)
         {
-            var h = JsonHelper.isKeyExist(jo, "hMusic") ? QualityType.H : ~QualityType.H;
-            var m = JsonHelper.isKeyExist(jo, "mMusic") ? QualityType.M : ~QualityType.M;
-            var l = JsonHelper.isKeyExist(jo, "lMusic") ? QualityType.L : ~QualityType.L;
+            var h = JsonHelper.isKeyExist(jo, "hMusic") ? QualityType.H : QualityType.Invalid;
+            var m = JsonHelper.isKeyExist(jo, "mMusic") ? QualityType.M : QualityType.Invalid;
+            var l = JsonHelper.isKeyExist(jo, "lMusic") ? QualityType.L : QualityType.Invalid;
             return h | m | l;
         }
     }
@@ -68,23 +69,26 @@ namespace WindMusicApp
 
             var isQualityExist = SongQuality.isQualityExist(jo);
 
-            if (isQualityExist != 0)
+            if (isQualityExist != QualityType.Invalid)
             {
                 //判断音质优先级
                 SongQuality quality = null;
                 if ((isQualityExist & QualityType.H) == QualityType.H)
                 {
-                    quality = new SongQuality(jo);
+                    var jQuality = (JObject)jo["hMusic"];
+                    quality = new SongQuality(jQuality);
                 }
 
                 if (quality != null & (isQualityExist & QualityType.M) == QualityType.M)
                 {
-                    quality = new SongQuality(jo);
+                    var jQuality = (JObject)jo["mMusic"];
+                    quality = new SongQuality(jQuality);
                 }
 
                 if (quality != null & (isQualityExist & QualityType.L) == QualityType.L)
                 {
-                    quality = new SongQuality(jo);
+                    var jQuality = (JObject)jo["lMusic"];
+                    quality = new SongQuality(jQuality);
                 }
 
                 Quality = quality;
@@ -112,7 +116,32 @@ namespace WindMusicApp
                 return false;
             }
             return true;
-        } 
+        }
+
+        public static Song getSong(string jsonStr)
+        {
+            if (jsonStr == null || jsonStr.Length == 0)
+            {
+                return null;
+            }
+
+            Song song = null;
+            try
+            {
+                JObject jo = (JObject)JsonConvert.DeserializeObject(jsonStr);
+                var songDic = (JArray)jo["songs"];
+                if (songDic.Count > 0)
+                {
+                    JObject tmpJSong = JObject.Parse(songDic[0].ToString());
+                    song = new Song(tmpJSong);
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception.Message);
+            }
+            return song;
+        }
 
         public static List<Song> getSongList(string jsonStr)
         {
@@ -138,21 +167,17 @@ namespace WindMusicApp
 
                     for (int i = 0; i < songDic.Count; ++i)  //遍历JArray
                     {
-
                         JObject tmpJSong = JObject.Parse(songDic[i].ToString());
                         var song = new Song(tmpJSong);
                         songList.Add(song);
                     }
                 }
-
             }
             catch (Exception exception)
             {
                 Debug.WriteLine(exception.Message);
             }
-
             return songList;
         }
-
     }
 }

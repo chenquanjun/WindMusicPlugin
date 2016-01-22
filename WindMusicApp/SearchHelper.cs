@@ -13,6 +13,7 @@ namespace WindMusicApp
         Invalid,
         SongList,
         SongInfo,
+        SongDownload,
     }
 
     class SearchHelper
@@ -35,11 +36,9 @@ namespace WindMusicApp
             m_httpClient = new WebClient();
             m_httpClient.Referer = "http://music.163.com/search/";
             m_httpClient.DownloadEvent += new WebClientDownloadEvent(onDownloadEvent);
+            m_httpClient.SaveFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\WindMusic\cache\";
 
             m_searchDic = new Dictionary<UInt32, SearchType>();
-
-            //var result = "{\"result\":{\"songCount\":25,\"songs\":[{\"id\":40915964,\"name\":\"???\",\"artists\":[{\"id\":0,\"name\":\"Xe(Xenoglossy)\",\"picUrl\":null,\"alias\":[],\"albumSize\":0,\"picId\":0,\"trans\":null,\"img1v1Url\":\"http://p4.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg\",\"img1v1\":0}],\"album\":{\"id\":3439827,\"name\":\"ノコギリシャルロット -Black Label-\",\"artist\":{\"id\":0,\"name\":\"\",\"picUrl\":null,\"alias\":[],\"albumSize\":0,\"picId\":0,\"trans\":null,\"img1v1Url\":\"http://p4.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg\",\"img1v1\":0},\"publishTime\":1451491200000,\"size\":0,\"copyrightId\":0,\"status\":0,\"picId\":3294136844431904},\"duration\":198582,\"copyrightId\":0,\"status\":0,\"alias\":[],\"fee\":0,\"mvid\":0,\"rtype\":0,\"rUrl\":null,\"ftype\":0}]},\"code\":200}";
-            //var songList = JsonHelper.getSongList(result);
         }
 
         private void setSearchType(UInt32 requestId, SearchType searchType)
@@ -77,6 +76,9 @@ namespace WindMusicApp
                 case SearchType.SongInfo:
                     figureSongInfo(result);
                     break;
+                case SearchType.SongDownload:
+
+                    break;
                 default:
                     break;
             }
@@ -84,7 +86,23 @@ namespace WindMusicApp
 
         private void figureSongInfo(string result)
         {
+            var song = JsonHelper.getSong(result);
+            if (song == null) {
+                return; //音乐不存在
+            }
+            var quality = song.Quality;
+            if (quality == null) {
+                return; //不能下载
+            }
 
+            //下载歌曲
+            var dfsIdStr = quality.DfsId;
+            var encryptStr = Util.GetEncryptStr(dfsIdStr);
+
+            var url = String.Format("http://m2.music.126.net/{0}/{1}.mp3", encryptStr, dfsIdStr);
+            var requestId = genRequestId();
+            setSearchType(requestId, SearchType.SongDownload);
+            m_httpClient.Download(url, requestId);
         }
 
         private void figureSongList(string result)
@@ -112,9 +130,9 @@ namespace WindMusicApp
             //结果过滤
             //用户过滤
             //数量限制
-
+            var encodeKeyword = System.Web.HttpUtility.UrlEncode(keyword);
             var url = "http://music.163.com/api/search/get/web";
-            var postData = "limit=1&s=" + keyword + "&total=true&type=1&offset=0";
+            var postData = "limit=1&s=" + encodeKeyword + "&total=true&type=1&offset=0";
             var requestId = genRequestId();
             setSearchType(requestId, SearchType.SongList);
             m_httpClient.Post(url, postData, requestId);

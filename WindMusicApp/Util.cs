@@ -18,11 +18,12 @@ namespace WindMusicApp
             byte[] bytHash = md5.ComputeHash(encryptBytes);
             md5.Clear();
             var encode = Convert.ToBase64String(bytHash);
-
+            encode = encode.Replace('/', '_');
+            encode = encode.Replace('+', '-');
             return encode;
         }
 
-        public static byte[] EncrytedId(string id)
+        private static byte[] EncrytedId(string id)
         {
             byte[] byte1 = Encoding.ASCII.GetBytes(magicEncryptString);
             byte[] byte2 = Encoding.ASCII.GetBytes(id);

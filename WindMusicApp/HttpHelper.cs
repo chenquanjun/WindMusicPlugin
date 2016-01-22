@@ -32,6 +32,7 @@ namespace WindMusicApp
         public UInt32 requestId { get; set; }
 
         public WebClient webClient { get; set; }
+
     } 
 
     ///<summary>  
@@ -44,7 +45,8 @@ namespace WindMusicApp
         private string referer = ""; //http://music.163.com/search/
         private int timeout = 10000; //ms
         private string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
-        
+        private string m_saveFolder = "";
+        private string m_defaultFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         ///<summary>  
         ///初始化WebClient类  
         ///</summary>  
@@ -57,6 +59,18 @@ namespace WindMusicApp
         {
             set { userAgent = value; }
             get { return userAgent; }
+        }
+
+        public string SaveFolder
+        {
+            set { 
+                m_saveFolder = value;
+                if (!Directory.Exists(m_saveFolder))
+                {
+                    Directory.CreateDirectory(m_saveFolder);
+                }
+            }
+            get { return m_saveFolder; }
         }
 
         public int Timeout
@@ -80,46 +94,86 @@ namespace WindMusicApp
             return req;
         }
 
-
-
         public void Get(string url, UInt32 requestId)
         {
-            HttpWebRequest req = CreateRequest(url, "GET");
+            try
+            {
+                HttpWebRequest req = CreateRequest(url, "GET");
 
-            WebAsyncObject webObject = new WebAsyncObject();
-            webObject.request = req;
-            webObject.requestId = requestId;
-            webObject.webClient = this;
-
-            req.BeginGetResponse(new AsyncCallback(OnResponse), webObject);
+                WebAsyncObject webObject = new WebAsyncObject();
+                webObject.request = req;
+                webObject.requestId = requestId;
+                webObject.webClient = this;
+                req.BeginGetResponse(new AsyncCallback(OnResponse), webObject);
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception.Message);
+                DownloadEventArgs args = new DownloadEventArgs();
+                args.requestId = requestId;
+                args.result = "";
+                DownloadEvent(this, args);
+            }
 
         }
 
         public void Post(string url, string postData, UInt32 requestId)
         {
-            HttpWebRequest req = CreateRequest(url, "POST");
-            byte[] bs = Encoding.ASCII.GetBytes(postData);
-            req.ContentType = "application/x-www-form-urlencoded";
-            req.ContentLength = bs.Length;
-            
-            if (referer.Length > 0)
+            try
             {
-                req.Referer = referer;
-            }
-            req.Accept = "*/*";
+                HttpWebRequest req = CreateRequest(url, "POST");
+                byte[] bs = Encoding.ASCII.GetBytes(postData);
+                req.ContentType = "application/x-www-form-urlencoded";
+                req.ContentLength = bs.Length;
 
-            using (Stream reqStream = req.GetRequestStream())
+                if (referer.Length > 0)
+                {
+                    req.Referer = referer;
+                }
+                req.Accept = "*/*";
+
+                using (Stream reqStream = req.GetRequestStream())
+                {
+                    reqStream.Write(bs, 0, bs.Length);
+                    reqStream.Close();
+                }
+
+                WebAsyncObject webObject = new WebAsyncObject();
+                webObject.request = req;
+                webObject.requestId = requestId;
+                webObject.webClient = this;
+
+                req.BeginGetResponse(new AsyncCallback(OnResponse), webObject);
+            }
+            catch (Exception exception)
             {
-                reqStream.Write(bs, 0, bs.Length);
-                reqStream.Close();
+                Debug.WriteLine(exception.Message);
+                DownloadEventArgs args = new DownloadEventArgs();
+                args.requestId = requestId;
+                args.result = "";
+                DownloadEvent(this, args);
             }
+        }
 
-            WebAsyncObject webObject = new WebAsyncObject();
-            webObject.request = req;
-            webObject.requestId = requestId;
-            webObject.webClient = this;
-
-            req.BeginGetResponse(new AsyncCallback(OnResponse), webObject);
+        public void Download(string url, UInt32 requestId)
+        {
+            try
+            {
+                HttpWebRequest req = CreateRequest(url, "GET");
+                WebAsyncObject webObject = new WebAsyncObject();
+                webObject.request = req;
+                webObject.requestId = requestId;
+                webObject.webClient = this;
+                req.BeginGetResponse(new AsyncCallback(onDownloadResponse), webObject);
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception.Message);
+                DownloadEventArgs args = new DownloadEventArgs();
+                args.requestId = requestId;
+                args.result = "";
+                DownloadEvent(this, args);
+            }
         }
 
         static void OnResponse(IAsyncResult ar)
@@ -132,51 +186,85 @@ namespace WindMusicApp
             HttpWebResponse response = null;
             Stream stream = null;
             StreamReader sr = null;
-            String result = "";
+            string result = "";
             try
             {
                 response = (HttpWebResponse)request.EndGetResponse(ar);
                 stream = response.GetResponseStream();
                 sr = new StreamReader(stream, Encoding.UTF8);
                 result = sr.ReadToEnd();
-                //Debug.WriteLine(result);
             }
             catch (Exception exception)
             {
                 Debug.WriteLine(exception.Message);
-
             }
             finally
             {
-
-                if (sr != null)
-                {
-                    sr.Close();
-                }
-
-                if (stream != null)
-                {
-                    stream.Close();
-                }
-
-                if (response != null)
-                {
-                    response.Close();
-                }
+                if (sr != null){sr.Close();}
+                if (stream != null){stream.Close();}
+                if (response != null){response.Close();}
                 request.Abort();
             }
 
             if (webClient.DownloadEvent != null)
             {
-                DownloadEventArgs args =new DownloadEventArgs();
+                DownloadEventArgs args = new DownloadEventArgs();
                 args.requestId = requestId;
                 args.result = result;
                 webClient.DownloadEvent(webClient, args);
             }
-
         }
 
+        static void onDownloadResponse(IAsyncResult ar)
+        {
+            var webObject = (WebAsyncObject)ar.AsyncState;
+            var request = webObject.request;
+            var requestId = webObject.requestId;
+            var webClient = webObject.webClient;
+            HttpWebResponse response = null;
+            Stream stream = null;
+            FileStream fs = null;
+            var url = request.RequestUri;
+            var urlStr = url.AbsoluteUri;
+            string fileName = webClient.m_saveFolder + urlStr.Substring(urlStr.LastIndexOf("/") + 1);
+            try
+            {
+                response = (HttpWebResponse)request.EndGetResponse(ar);
+                stream = response.GetResponseStream();
 
+                byte[] buffer = new byte[32 * 1024];
+                int bytesProcessed = 0;
+                fs = File.Create(fileName);
+                int bytesRead;
+                do
+                {
+                    bytesRead = stream.Read(buffer, 0, buffer.Length);
+                    fs.Write(buffer, 0, bytesRead);
+                    bytesProcessed += bytesRead;
+                }
+                while (bytesRead > 0);
 
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine(exception.Message);
+                fileName = "";
+            }
+            finally
+            {
+                if (fs != null){fs.Flush(); fs.Close(); }
+                if (stream != null){stream.Close();}
+                if (response != null){response.Close();}
+                request.Abort();
+            }
+
+            if (webClient.DownloadEvent != null)
+            {
+                DownloadEventArgs args = new DownloadEventArgs();
+                args.requestId = requestId;
+                args.result = fileName;
+                webClient.DownloadEvent(webClient, args);
+            }
+        }
     }
 }
