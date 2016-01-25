@@ -290,5 +290,65 @@ namespace WindMusicApp
             var text = textBox1.Text;
             
         }
+
+        Point m_mouseOff;//鼠标移动位置变量
+        bool m_leftFlag;//标记是否为左键
+
+        private void WindMusicForm_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                m_mouseOff = new Point(-e.X, -e.Y); //得到变量的值
+                m_leftFlag = true;                  //点击左键按下时标注为true;
+            }
+        }
+
+        private void WindMusicForm_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (m_leftFlag)
+            {
+                Point mouseSet = Control.MousePosition;
+                mouseSet.Offset(m_mouseOff.X, m_mouseOff.Y);  //设置移动后的位置
+                Location = mouseSet;
+            }
+        }
+
+        private void WindMusicForm_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (m_leftFlag)
+            {
+                m_leftFlag = false;//释放鼠标后标注为false;
+            }
+        }
+
+        private void notifyIconMin_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Normal)
+            {
+                HideMainForm();
+            }
+            else if (this.WindowState == FormWindowState.Minimized)
+            {
+                ShowMainForm();
+            }
+        }
+
+        private void HideMainForm()
+        {
+            this.WindowState = FormWindowState.Minimized;
+            this.Hide();
+        }
+
+        private void ShowMainForm()
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+            this.Activate();
+        }
+
+        private void menuNotifyItemSetting_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

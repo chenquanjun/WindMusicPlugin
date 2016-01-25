@@ -42,7 +42,11 @@
             this.progressLabel = new System.Windows.Forms.Label();
             this.buttonSearch = new System.Windows.Forms.Button();
             this.buttonDownload = new System.Windows.Forms.Button();
+            this.notifyIconMin = new System.Windows.Forms.NotifyIcon(this.components);
+            this.menuNotify = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.menuNotifyItemSetting = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.axWindowsMediaPlayer1)).BeginInit();
+            this.menuNotify.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -131,6 +135,25 @@
             this.buttonDownload.UseVisualStyleBackColor = true;
             this.buttonDownload.Click += new System.EventHandler(this.buttonDownload_Click);
             // 
+            // notifyIconMin
+            // 
+            this.notifyIconMin.ContextMenuStrip = this.menuNotify;
+            resources.ApplyResources(this.notifyIconMin, "notifyIconMin");
+            this.notifyIconMin.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIconMin_MouseDoubleClick);
+            // 
+            // menuNotify
+            // 
+            this.menuNotify.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuNotifyItemSetting});
+            this.menuNotify.Name = "menuNotify";
+            resources.ApplyResources(this.menuNotify, "menuNotify");
+            // 
+            // menuNotifyItemSetting
+            // 
+            this.menuNotifyItemSetting.Name = "menuNotifyItemSetting";
+            resources.ApplyResources(this.menuNotifyItemSetting, "menuNotifyItemSetting");
+            this.menuNotifyItemSetting.Click += new System.EventHandler(this.menuNotifyItemSetting_Click);
+            // 
             // WindMusicForm
             // 
             resources.ApplyResources(this, "$this");
@@ -145,11 +168,16 @@
             this.Controls.Add(this.axWindowsMediaPlayer1);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "WindMusicForm";
-            this.Load += new System.EventHandler(this.WindMisicForm_Load);
+            this.ShowInTaskbar = false;
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.WindMusicForm_MouseDown);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.WindMusicForm_MouseMove);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.WindMusicForm_MouseUp);
             ((System.ComponentModel.ISupportInitialize)(this.axWindowsMediaPlayer1)).EndInit();
+            this.menuNotify.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -169,6 +197,9 @@
         private System.Windows.Forms.Label progressLabel;
         private System.Windows.Forms.Button buttonSearch;
         private System.Windows.Forms.Button buttonDownload;
+        private System.Windows.Forms.NotifyIcon notifyIconMin;
+        private System.Windows.Forms.ContextMenuStrip menuNotify;
+        private System.Windows.Forms.ToolStripMenuItem menuNotifyItemSetting;
     }
 }
 
