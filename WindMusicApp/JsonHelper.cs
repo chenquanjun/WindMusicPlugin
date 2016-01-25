@@ -79,13 +79,13 @@ namespace WindMusicApp
                     quality = new SongQuality(jQuality);
                 }
 
-                if (quality != null & (isQualityExist & QualityType.M) == QualityType.M)
+                if (quality == null & (isQualityExist & QualityType.M) == QualityType.M)
                 {
                     var jQuality = (JObject)jo["mMusic"];
                     quality = new SongQuality(jQuality);
                 }
 
-                if (quality != null & (isQualityExist & QualityType.L) == QualityType.L)
+                if (quality == null & (isQualityExist & QualityType.L) == QualityType.L)
                 {
                     var jQuality = (JObject)jo["lMusic"];
                     quality = new SongQuality(jQuality);
@@ -128,7 +128,8 @@ namespace WindMusicApp
             Song song = null;
             try
             {
-                JObject jo = (JObject)JsonConvert.DeserializeObject(jsonStr);
+                //JObject jo = (JObject)JsonConvert.DeserializeObject(jsonStr);
+                JObject jo = JObject.Parse(jsonStr);
                 var songDic = (JArray)jo["songs"];
                 if (songDic.Count > 0)
                 {
@@ -153,7 +154,8 @@ namespace WindMusicApp
             List<Song>songList = new List<Song>();
             try
             {
-                JObject jo = (JObject)JsonConvert.DeserializeObject(jsonStr);
+                //JObject jo = (JObject)JsonConvert.DeserializeObject(jsonStr);
+                JObject jo = JObject.Parse(jsonStr);
 
                 var resultDic = (JObject)jo["result"];
                 var code = jo["code"].ToString();
