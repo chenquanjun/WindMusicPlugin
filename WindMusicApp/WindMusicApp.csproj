@@ -70,18 +70,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="JsonHelper.cs" />
-    <Compile Include="MusicPlayer.cs" />
-    <Compile Include="HttpHelper.cs" />
-    <Compile Include="SearchHelper.cs" />
-    <Compile Include="Util.cs" />
-    <Compile Include="WindMusicForm.cs">
+    <Compile Include="Basic\DemandInfo.cs" />
+    <Compile Include="Basic\DemandQueue.cs" />
+    <Compile Include="Helper\JsonHelper.cs" />
+    <Compile Include="Controller\MusicControl.cs" />
+    <Compile Include="Helper\MusicHelper.cs" />
+    <Compile Include="Helper\HttpHelper.cs" />
+    <Compile Include="Helper\SearchHelper.cs" />
+    <Compile Include="Basic\Song.cs" />
+    <Compile Include="Util\Util.cs" />
+    <Compile Include="UI\WindMusicForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="WindMusicForm.Designer.cs">
+    <Compile Include="UI\WindMusicForm.Designer.cs">
       <DependentUpon>WindMusicForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="WindMusicApp.cs" />
+    <Compile Include="UI\WindMusicApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -92,10 +96,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="WindMusicForm.resx">
+    <EmbeddedResource Include="UI\WindMusicForm.resx">
       <DependentUpon>WindMusicForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="WindMusicForm.zu.resx">
+    <EmbeddedResource Include="UI\WindMusicForm.zu.resx">
       <DependentUpon>WindMusicForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">

@@ -24,15 +24,15 @@ namespace WindMusicApp
     {
         private IBroadCast watch = null;
         private EventWrapper wrapper = null;
-        private MusicPlayer player = null;
-        private SearchHelper searchHelper = null;
+       
+        private MusicControl m_musicControl = null;
 
         public WindMusicForm()
         {
             InitializeComponent();
         }
 
-        private void WindMisicForm_Load(object sender, EventArgs e)
+        private void WindMusicForm_Load(object sender, EventArgs e)
         {
             /*
             try
@@ -61,20 +61,42 @@ namespace WindMusicApp
             }
             */
 
+            //取消订阅
+            //watch.BroadCastEvent -= new BroadCastEventHandler(wrapper.BroadCasting);
+
             //music player
-            player = new MusicPlayer();
+            var player = new MusicHelper();
             player.SetMusicPlayer(this.axWindowsMediaPlayer1);
             player.SetTimer(this.timerMusic);
 
-            //player event handler
-            player.AddFolderEvent += new MusicEventAddFolderHandler(onAddFolderEvent);
-            player.RemoveFolderEvent += new MusicEventRemoveFolderHandler(onRemoveFolderEvent);
+            //music control
+            m_musicControl = new MusicControl(player);
 
-            searchHelper = new SearchHelper();
+            //music event handler
+            m_musicControl.AddFolderEvent += new MusicEventAddFolderHandler(onAddFolderEvent);
+            m_musicControl.RemoveFolderEvent += new MusicEventRemoveFolderHandler(onRemoveFolderEvent);
+            m_musicControl.DemandInfoEvent += new MusicEventDemandInfoHandler(onDemandInfo);
 
             //button state
             buttonDelete.Enabled = false; 
 
+        }
+
+        private void onDemandInfo(DemandInfo info)
+        {
+            
+            var isError = info.isError();
+
+            if (isError)
+            {
+                Debug.WriteLine("SongInfo Error: " + info.Keyword + " status:" + info.Status + " error:" + info.Error);
+            }
+            else
+            {
+                var status = info.Status;
+
+                Debug.WriteLine("SongInfo: " + info.Keyword + " status:" + info.Status);
+            }
         }
 
 
@@ -158,44 +180,9 @@ namespace WindMusicApp
         }
 
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            
-            try{
-                watch.BroadCastEvent -= new BroadCastEventHandler(wrapper.BroadCasting);
-                MessageBox.Show("取消订阅广播成功!");
-            }
-            catch 
-            {
-                Debug.WriteLine("取消订阅广播失败，服务器已经关闭！");
-            }
-              
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void axWindowsMediaPlayer1_Enter(object sender, EventArgs e)
         {
 
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog of = new OpenFileDialog();
-            of.InitialDirectory = "c:\\";
-            of.Filter = "mp3|*.mp3|wav|*.wav";
-            of.RestoreDirectory = true;
-            of.FilterIndex = 1;
-            of.Multiselect = false;
-            if (of.ShowDialog() == DialogResult.OK)
-            {
-                var fileName = of.FileName;
-                player.SetMusicFileName(fileName);
-                player.play();
-            }
         }
 
         private void timerMusic_Tick(object sender, EventArgs e)
@@ -222,7 +209,7 @@ namespace WindMusicApp
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 string foldPath = dialog.SelectedPath;
-                player.AddMusicFolder(foldPath);
+                m_musicControl.AddMusicFolder(foldPath); 
             }
         }
 
@@ -233,11 +220,11 @@ namespace WindMusicApp
             if (System.IO.File.Exists(fullPath)) //如果是文件的话，则截取
             {
                 string path = fullPath.Substring(0, fullPath.LastIndexOf("\\"));
-                player.AddMusicFolder(path);
+                m_musicControl.AddMusicFolder(path);
             }
             else
             {
-                player.AddMusicFolder(fullPath);
+                m_musicControl.AddMusicFolder(fullPath);
             }
 
         }
@@ -268,27 +255,17 @@ namespace WindMusicApp
             {
                 var selectItem = selectItems[0];
                 var text = selectItem.Text;
-                player.removeMusicFolder(text);
+                m_musicControl.removeMusicFolder(text);
             }
             buttonDelete.Enabled = false;
-
-        }
-
-        private void progressLabel_Click(object sender, EventArgs e)
-        {
 
         }
 
         private void buttonSearch_Click(object sender, EventArgs e)
         {
             var text = textBox1.Text;
-            searchHelper.downloadSongList(text);
-        }
-
-        private void buttonDownload_Click(object sender, EventArgs e)
-        {
-            var text = textBox1.Text;
-            
+            //searchHelper.downloadSongList(text);
+            m_musicControl.OnRcvDamaku("test", text);
         }
 
         Point m_mouseOff;//鼠标移动位置变量
@@ -350,5 +327,6 @@ namespace WindMusicApp
         {
 
         }
+
     }
 }
