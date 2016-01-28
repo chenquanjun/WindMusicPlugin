@@ -43,6 +43,8 @@ namespace WindMusicApp
         private Dictionary<UInt32, SearchInfoType> m_searchTypeInfoDic;
         private UInt32 m_requestIdOrder;
 
+        private System.Windows.Forms.Control m_invokeObj;
+
         private UInt32 genRequestId()
         {
             var requestId = m_requestIdOrder;
@@ -50,8 +52,10 @@ namespace WindMusicApp
             return requestId;
         }
 
-        public SearchHelper()
+        public SearchHelper(System.Windows.Forms.Control invokeObj)
         {
+
+            m_invokeObj = invokeObj;
             //download
             m_httpClient = new WebClient();
             m_httpClient.Referer = "http://music.163.com/search/";
@@ -83,62 +87,81 @@ namespace WindMusicApp
             return null;
         }
 
+        private delegate void OnDownloadCallback(DownloadEventArgs e);
+        private void onDownload(DownloadEventArgs e)
+        {
+            
+            // InvokeRequired需要比较调用线程ID和创建线程ID
+            // 如果它们不相同则返回true
+            if (m_invokeObj.InvokeRequired)
+            {
+                Debug.WriteLine("onDownload 1:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
+                var d = new OnDownloadCallback(onDownload);
+                m_invokeObj.Invoke(d, new object[] { e });
+            }
+            else
+            {
+                Debug.WriteLine("onDownload 2:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
+                var result = e.result;
+                var requestId = e.requestId;
+
+                var searchInfo = getSearchType(requestId);
+
+                if (searchInfo == null)
+                {
+                    Debug.WriteLine("Warning: requst not exist id:" + requestId + " result:" + result);
+                    return;
+                }
+                var searchType = searchInfo.searchType;
+                var queueId = searchInfo.queueId;
+                Debug.WriteLine("request id:" + requestId + " que:" + queueId + " result:" + result + " searchType" + searchType);
+
+                Song song = null;
+                string songPath = "";
+                switch (searchType)
+                {
+                    case SearchType.Invalid:
+                        break;
+                    case SearchType.SongList:
+                        var songList = JsonHelper.getSongList(result);
+                        if (songList.Count > 0)
+                        {
+                            song = songList[0]; //只下载第一首歌
+                        }
+                        break;
+                    case SearchType.SongInfo:
+                        song = JsonHelper.getSong(result);
+                        if (song != null)
+                        {
+                            var quality = song.Quality;
+                            if (quality == null)
+                            {
+                                song = null;
+                            }
+                        }
+                        break;
+                    case SearchType.SongDownload:
+                        songPath = result;
+                        break;
+                    default:
+                        break;
+                }
+
+                var resultInfo = new SearchResult();
+                resultInfo.SongInfo = song;
+                resultInfo.QueueId = queueId;
+                resultInfo.SongPath = songPath;
+
+                if (SearchResultEvent != null)
+                {
+                    SearchResultEvent(resultInfo);
+                }
+            }
+        }
+
         private void onDownloadEvent(object sender, DownloadEventArgs e)
         {
-            var result = e.result;
-            var requestId = e.requestId;
-
-            var searchInfo = getSearchType(requestId);
-
-            if (searchInfo == null)
-            {
-                Debug.WriteLine("Warning: requst not exist id:" + requestId +  " result:" + result);
-                return;
-            }
-            var searchType = searchInfo.searchType;
-            var queueId = searchInfo.queueId;
-            Debug.WriteLine("request id:" + requestId + " que:" + queueId + " result:" + result + " searchType" + searchType);
-
-            Song song = null;
-            string songPath = "";
-            switch (searchType)
-            {
-                case SearchType.Invalid:
-                    break;
-                case SearchType.SongList:
-                     var songList = JsonHelper.getSongList(result);
-                    if (songList.Count > 0)
-                    {
-                        song = songList[0]; //只下载第一首歌
-                    }
-                    break;
-                case SearchType.SongInfo:
-                    song = JsonHelper.getSong(result);
-                    if (song != null)
-                    {
-                        var quality = song.Quality;
-                        if (quality == null)
-                        {
-                            song = null;
-                        }
-                    }
-                    break;
-                case SearchType.SongDownload:
-                    songPath = result;
-                    break;
-                default:
-                    break;
-            }
-
-            var resultInfo = new SearchResult();
-            resultInfo.SongInfo = song;
-            resultInfo.QueueId = queueId;
-            resultInfo.SongPath = songPath;
-
-            if (SearchResultEvent != null)
-            {
-                SearchResultEvent(resultInfo);
-            }
+            onDownload(e);//切换线程
         }
 
         public void DownloadSong(Song song, UInt32 queueId)

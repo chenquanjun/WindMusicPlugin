@@ -10,13 +10,12 @@ using RE = System.Text.RegularExpressions.Regex;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Authentication;
 using System.Net.Security;
-//using System.Runtime.Serialization.Json;
-//using System.Runtime.Serialization;
 using System.Diagnostics;
 using System.IO.Compression;
 
 namespace WindMusicApp
 {
+    //此回调是多线程，数据处理需切换成主线程
     public delegate void WebClientDownloadEvent(object sender, DownloadEventArgs e);
 
     public struct DownloadEventArgs
@@ -47,6 +46,8 @@ namespace WindMusicApp
         private string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
         private string m_saveFolder = "";
         private string m_defaultFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        private readonly string m_tmpFileExtName = ".tmp";
         ///<summary>  
         ///初始化WebClient类  
         ///</summary>  
@@ -96,6 +97,7 @@ namespace WindMusicApp
 
         public void Get(string url, UInt32 requestId)
         {
+            //Debug.WriteLine("Get " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             try
             {
                 HttpWebRequest req = CreateRequest(url, "GET");
@@ -119,6 +121,7 @@ namespace WindMusicApp
 
         public void Post(string url, string postData, UInt32 requestId)
         {
+            //Debug.WriteLine("Post " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             try
             {
                 HttpWebRequest req = CreateRequest(url, "POST");
@@ -157,6 +160,18 @@ namespace WindMusicApp
 
         public void Download(string url, UInt32 requestId)
         {
+            //判断文件是否存在
+            string fileName = m_saveFolder + url.Substring(url.LastIndexOf("/") + 1);
+            if (File.Exists(fileName))
+            {
+                Debug.WriteLine("File already download " + fileName);
+                DownloadEventArgs args = new DownloadEventArgs();
+                args.requestId = requestId;
+                args.result = fileName;
+                DownloadEvent(this, args);
+                return;
+            }
+
             try
             {
                 HttpWebRequest req = CreateRequest(url, "GET");
@@ -178,6 +193,7 @@ namespace WindMusicApp
 
         static void OnResponse(IAsyncResult ar)
         {
+            //Debug.WriteLine("OnResponse 1:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
             var webObject = (WebAsyncObject)ar.AsyncState;
             var request = webObject.request;
             var requestId = webObject.requestId;
@@ -205,7 +221,7 @@ namespace WindMusicApp
                 if (response != null){response.Close();}
                 request.Abort();
             }
-
+            //Debug.WriteLine("OnResponse 2:" + System.Threading.Thread.CurrentThread.ManagedThreadId);
             if (webClient.DownloadEvent != null)
             {
                 DownloadEventArgs args = new DownloadEventArgs();
@@ -227,6 +243,8 @@ namespace WindMusicApp
             var url = request.RequestUri;
             var urlStr = url.AbsoluteUri;
             string fileName = webClient.m_saveFolder + urlStr.Substring(urlStr.LastIndexOf("/") + 1);
+            string tmpFileName = fileName + webClient.m_tmpFileExtName;
+            bool isError = false;
             try
             {
                 response = (HttpWebResponse)request.EndGetResponse(ar);
@@ -234,7 +252,7 @@ namespace WindMusicApp
 
                 byte[] buffer = new byte[32 * 1024];
                 int bytesProcessed = 0;
-                fs = File.Create(fileName);
+                fs = File.Create(tmpFileName);
                 int bytesRead;
                 do
                 {
@@ -248,7 +266,7 @@ namespace WindMusicApp
             catch (Exception exception)
             {
                 Debug.WriteLine(exception.Message);
-                fileName = "";
+                isError = true;
             }
             finally
             {
@@ -256,6 +274,27 @@ namespace WindMusicApp
                 if (stream != null){stream.Close();}
                 if (response != null){response.Close();}
                 request.Abort();
+
+                if (isError) //出错了
+                {
+                    //删除文件
+                    if (File.Exists(tmpFileName))
+                    {
+                        File.Delete(tmpFileName);
+                    }
+                    fileName = "";
+                }
+                else
+                {
+                    if (File.Exists(tmpFileName))
+                    {
+                        File.Move(tmpFileName, fileName);
+                    }
+                    else
+                    {
+                        fileName = "";
+                    }
+                }
             }
 
             if (webClient.DownloadEvent != null)

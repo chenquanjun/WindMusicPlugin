@@ -60,7 +60,8 @@
             // 
             // timerMusic
             // 
-            this.timerMusic.Tick += new System.EventHandler(this.timerMusic_Tick);
+            this.timerMusic.Enabled = true;
+            this.timerMusic.Tick += new System.EventHandler(this.TimerMusic_Tick);
             // 
             // listViewFolder
             // 

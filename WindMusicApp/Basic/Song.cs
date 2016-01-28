@@ -99,5 +99,7 @@ namespace WindMusicApp
         public int Duration { get; set; }
 
         public SongQuality Quality { get; set; }
+
+        public string FileName { get; set; }
     } 
 }

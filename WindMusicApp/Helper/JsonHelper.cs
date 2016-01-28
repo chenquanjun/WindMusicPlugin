@@ -14,12 +14,13 @@ namespace WindMusicApp
 
         public static bool isKeyExist(JObject jo, string key)
         {
-            var value = jo.Property(key);
-            if (value == null)
+            var property = jo.Property(key);
+            if (property == null)
             {
                 return false;
             }
-            if (value.ToString() == "")
+            var value = property.Value;
+            if (value.HasValues == false)
             {
                 return false;
             }

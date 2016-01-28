@@ -53,21 +53,21 @@ namespace WindMusicApp
             return Error != DemandSongError.Invalid;
         }
 
-        public DemandInfo Clone()
-        {
-            Type t = GetType();
-            PropertyInfo[] properties = t.GetProperties();
-            Object p = t.InvokeMember("", System.Reflection.BindingFlags.CreateInstance, null, this, null);
-            foreach (PropertyInfo pi in properties)
-            {
-                if (pi.CanWrite)
-                {
-                    object value = pi.GetValue(this, null);
-                    pi.SetValue(p, value, null);
-                }
-            }
-            return (DemandInfo)p;
-        }
+        //public DemandInfo Clone()
+        //{
+        //    Type t = GetType();
+        //    PropertyInfo[] properties = t.GetProperties();
+        //    Object p = t.InvokeMember("", System.Reflection.BindingFlags.CreateInstance, null, this, null);
+        //    foreach (PropertyInfo pi in properties)
+        //    {
+        //        if (pi.CanWrite)
+        //        {
+        //            object value = pi.GetValue(this, null);
+        //            pi.SetValue(p, value, null);
+        //        }
+        //    }
+        //    return (DemandInfo)p;
+        //}
     }
 
 }

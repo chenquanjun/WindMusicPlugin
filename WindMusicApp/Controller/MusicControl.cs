@@ -19,10 +19,6 @@ namespace WindMusicApp
      * (3)歌曲黑名单
      * (4)已存在
      */
-    public delegate void MusicEventAddFolderHandler(string folderName);
-    public delegate void MusicEventRemoveFolderHandler(string folderName);
-
-    public delegate void MusicEventDemandInfoHandler(DemandInfo info);
 
 
 
@@ -35,32 +31,35 @@ namespace WindMusicApp
             DemandMusic = 2, //点歌
         }
 
-        private MusicMode m_curMusicMode = MusicMode.Invalid;
+        private MusicMode m_curMusicMode = MusicMode.Invalid; //当前播放模式
 
-        private UInt32 m_queueIdOrder;
+        private UInt32 m_queueIdOrder; //queue id 生成
 
-        private ArrayList m_localMusicFolderNames;
-        private ArrayList m_localMusicList;
-        private Dictionary<string, bool> m_musicExtDic;
+        private ArrayList m_localMusicFolderNames; //本地目录列表
+        private ArrayList m_localMusicList; //本地音乐列表
+        private Dictionary<string, bool> m_musicExtDic; //音乐扩展名字典
 
-        private DemandQueue m_demandMusicQue;
-        private ArrayList m_tmpDemandQue;
-        private UInt32 m_busyDemandQueueId;
+        private DemandQueue m_demandMusicQue; //点歌音乐队列
+        private ArrayList m_tmpDemandQue; //临时点歌队列
+        private UInt32 m_busyDemandQueueId; //当前处理的队列id
 
-        private SearchHelper m_searchHelper = null;
-        private MusicHelper m_musicPlayer = null;
+        private SearchHelper m_searchHelper = null; //搜索模块
+        private MusicHelper m_musicPlayer = null; //播放模块
 
         public event MusicEventAddFolderHandler AddFolderEvent;
         public event MusicEventRemoveFolderHandler RemoveFolderEvent;
+
         public event MusicEventDemandInfoHandler DemandInfoEvent;
 
+        
         private readonly string m_demandFormatStr = "点歌 ";
 
-        public MusicControl(MusicHelper player)
+
+        public MusicControl(MusicHelper player, System.Windows.Forms.Control invokeObj)
         {
             var maxNum = 9;
             //init
-            m_localMusicFolderNames = new ArrayList();//读取保存的文件路径
+            m_localMusicFolderNames = new ArrayList();
             m_localMusicList = new ArrayList();
             m_demandMusicQue = new DemandQueue(maxNum);
             m_tmpDemandQue = new ArrayList();
@@ -70,14 +69,69 @@ namespace WindMusicApp
             m_musicExtDic.Add(".wav", true);
             m_musicExtDic.Add(".wma", true);
 
-            m_searchHelper = new SearchHelper();
+            m_searchHelper = new SearchHelper(invokeObj);
             m_searchHelper.SearchResultEvent += new SearchEventSearchResultHandler(onSearchResult);
 
             m_musicPlayer = player;
+            m_musicPlayer.MusicPlayStateEvent += new MusicEventMusicPlayStateHandler(onPlayState);
+            m_musicPlayer.MusicPlayDurationEvent += new MusicEventMusicPlayDurationHandler(onPlayDuration);
 
             m_queueIdOrder = 1; //从1开始,0用来判断无效
 
             m_busyDemandQueueId = 0;
+        }
+
+        public void TimerMusic_Tick(object sender, EventArgs e)
+        {
+            m_musicPlayer.TimerTicker(sender, e);
+        }
+
+        private void onPlayState(UInt32 queueId, MusicPlayState playState)
+        {
+            var demandInfo = m_demandMusicQue.GetInfo(queueId);
+            Debug.Assert(demandInfo != null, "should exist demand info:" + queueId + " state:" + playState);
+
+            switch (playState)
+            {
+                case MusicPlayState.Stop:
+                    demandInfo.Status = DemandSongStatus.PlayEnd;
+                    removeDemandInfo(demandInfo);
+                    tryPlayMusic();
+                    break;
+                case MusicPlayState.Pause:
+                    break;
+                case MusicPlayState.Playing:
+                    demandInfo.Status = DemandSongStatus.Playing;
+                    postDemandInfo(demandInfo);
+                    break;
+                case MusicPlayState.Resume:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void onPlayDuration(UInt32 queueId, double curDur, double totalDur)
+        {
+
+        }
+
+        private void tryPlayMusic()
+        {
+            //尝试播放音乐
+            var firstInfo = m_demandMusicQue.First();
+            if (firstInfo != null)//点歌模式
+            {
+                if (firstInfo.Status == DemandSongStatus.WaitPlay) //队列第一个刚好是等待播放状态
+                {
+                    m_musicPlayer.Play(firstInfo.QueueId, firstInfo.SongInfo.FileName);
+                }
+                
+            }
+            else //自定义音乐播放模式
+            {
+
+            }
         }
 
         private void onSearchResult(SearchResult resultInfo)
@@ -121,6 +175,7 @@ namespace WindMusicApp
                     else //下载
                     {
                         demandInfo.Status = DemandSongStatus.Download;
+                        demandInfo.SongInfo = songInfo;
                         postDemandInfo(demandInfo);
                         m_searchHelper.DownloadSong(songInfo, queueId);
 
@@ -136,9 +191,11 @@ namespace WindMusicApp
                     else //等待播放
                     {
                         demandInfo.Status = DemandSongStatus.WaitPlay;
+                        demandInfo.SongInfo.FileName = songPath;
                         postDemandInfo(demandInfo);
 
                         //添加到播放列表
+                        tryPlayMusic();
                     }
                     break;
                 default:
@@ -156,6 +213,7 @@ namespace WindMusicApp
 
         private void tryFinishQueue(UInt32 queueId)
         {
+            //尝试完成队列
             if (queueId == m_busyDemandQueueId)
             {
                 m_busyDemandQueueId = 0;
@@ -166,15 +224,17 @@ namespace WindMusicApp
 
         private void removeDemandInfo(DemandInfo info)
         {
+            //删除点歌信息
             if (DemandInfoEvent != null)
             {
-                DemandInfoEvent(info.Clone());
+                DemandInfoEvent(info);
             }
             m_demandMusicQue.Remove(info);
         }
 
         private string checkDemandMusicName(string keyword)
         {
+            //检验点歌格式是否正确
             if (keyword == null || keyword.IndexOf(m_demandFormatStr) != 0)
             {
                 Debug.WriteLine("Warning: Ignore damaku with format error:" + keyword);
@@ -226,7 +286,7 @@ namespace WindMusicApp
         {
             if (DemandInfoEvent != null)
             {
-                DemandInfoEvent(info.Clone());
+                DemandInfoEvent(info);
             }
         }
 

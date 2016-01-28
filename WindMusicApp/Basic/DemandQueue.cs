@@ -59,5 +59,15 @@ namespace WindMusicApp
             }
             return info;
         }
+
+        public DemandInfo First()
+        {
+            if (m_demandMusicQue.Count == 0)
+            {
+                return null;
+            }
+
+            return (DemandInfo)m_demandMusicQue[0];
+        }
     }
 }

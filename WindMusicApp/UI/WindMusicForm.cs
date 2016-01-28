@@ -70,7 +70,7 @@ namespace WindMusicApp
             player.SetTimer(this.timerMusic);
 
             //music control
-            m_musicControl = new MusicControl(player);
+            m_musicControl = new MusicControl(player, this);
 
             //music event handler
             m_musicControl.AddFolderEvent += new MusicEventAddFolderHandler(onAddFolderEvent);
@@ -185,9 +185,9 @@ namespace WindMusicApp
 
         }
 
-        private void timerMusic_Tick(object sender, EventArgs e)
+        private void TimerMusic_Tick(object sender, EventArgs e)
         {
-            
+            m_musicControl.TimerMusic_Tick(sender, e);
         }
 
         private void listViewFolder_SelectedIndexChanged(object sender, EventArgs e)
@@ -263,6 +263,7 @@ namespace WindMusicApp
 
         private void buttonSearch_Click(object sender, EventArgs e)
         {
+            //Debug.WriteLine("buttonSearch_Click" + System.Threading.Thread.CurrentThread.ManagedThreadId);
             var text = textBox1.Text;
             //searchHelper.downloadSongList(text);
             m_musicControl.OnRcvDamaku("test", text);

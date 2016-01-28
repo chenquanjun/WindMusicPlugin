@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="Basic\DemandInfo.cs" />
     <Compile Include="Basic\DemandQueue.cs" />
+    <Compile Include="Delegate\Delegate.cs" />
     <Compile Include="Helper\JsonHelper.cs" />
     <Compile Include="Controller\MusicControl.cs" />
     <Compile Include="Helper\MusicHelper.cs" />
