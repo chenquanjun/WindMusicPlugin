@@ -41,6 +41,10 @@
             this.notifyIconMin = new System.Windows.Forms.NotifyIcon(this.components);
             this.menuNotify = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuNotifyItemSetting = new System.Windows.Forms.ToolStripMenuItem();
+            this.listViewMusic = new System.Windows.Forms.ListView();
+            this.headerStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.headerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.headerUser = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.axWindowsMediaPlayer1)).BeginInit();
             this.menuNotify.SuspendLayout();
             this.SuspendLayout();
@@ -124,10 +128,35 @@
             resources.ApplyResources(this.menuNotifyItemSetting, "menuNotifyItemSetting");
             this.menuNotifyItemSetting.Click += new System.EventHandler(this.menuNotifyItemSetting_Click);
             // 
+            // listViewMusic
+            // 
+            this.listViewMusic.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.headerStatus,
+            this.headerName,
+            this.headerUser});
+            this.listViewMusic.HideSelection = false;
+            resources.ApplyResources(this.listViewMusic, "listViewMusic");
+            this.listViewMusic.Name = "listViewMusic";
+            this.listViewMusic.UseCompatibleStateImageBehavior = false;
+            this.listViewMusic.View = System.Windows.Forms.View.Details;
+            // 
+            // headerStatus
+            // 
+            resources.ApplyResources(this.headerStatus, "headerStatus");
+            // 
+            // headerName
+            // 
+            resources.ApplyResources(this.headerName, "headerName");
+            // 
+            // headerUser
+            // 
+            resources.ApplyResources(this.headerUser, "headerUser");
+            // 
             // WindMusicForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.listViewMusic);
             this.Controls.Add(this.buttonSearch);
             this.Controls.Add(this.buttonDelete);
             this.Controls.Add(this.buttonAdd);
@@ -163,6 +192,10 @@
         private System.Windows.Forms.NotifyIcon notifyIconMin;
         private System.Windows.Forms.ContextMenuStrip menuNotify;
         private System.Windows.Forms.ToolStripMenuItem menuNotifyItemSetting;
+        private System.Windows.Forms.ListView listViewMusic;
+        private System.Windows.Forms.ColumnHeader headerStatus;
+        private System.Windows.Forms.ColumnHeader headerName;
+        private System.Windows.Forms.ColumnHeader headerUser;
     }
 }
 

@@ -82,20 +82,102 @@ namespace WindMusicApp
 
         }
 
+
         private void onDemandInfo(DemandInfo info)
         {
-            
+            var queueId = info.QueueId.ToString();
+            var status = info.Status;
+
+            var items = listViewMusic.Items;
+            ListViewItem item = items[queueId];
+
+            if (item == null)
+            {
+                if (status != DemandSongStatus.Queue) //已经被删除
+                {
+                    return;
+                }
+                else //初始化
+                {
+                    item = new ListViewItem();
+                    item.Name = queueId;
+                    item.SubItems.Add(info.Keyword);
+                    item.SubItems.Add(info.UserName);
+
+                    listViewMusic.Items.Add(item);
+                }
+            }
+
+
             var isError = info.isError();
+            
 
             if (isError)
             {
+                string tipsStr = null;
+                switch (info.Error)
+                {
+                    case DemandSongError.Full:
+                        tipsStr = "曲单已满";
+                        break;
+                    case DemandSongError.Search:
+                        tipsStr = "找不到歌曲";
+                        break;
+                    case DemandSongError.GetDetail:
+                        tipsStr = "获取歌曲信息失败";
+                        break;
+                    case DemandSongError.Download:
+                        tipsStr = "下载失败";
+                        break;
+                    case DemandSongError.Cancel:
+                        tipsStr = "取消";
+                        break;
+                    default:
+                        break;
+                }
+
+                if (tipsStr != null)
+                {
+                    item.Text = tipsStr;
+                }
                 Debug.WriteLine("SongInfo Error: " + info.Keyword + " status:" + info.Status + " error:" + info.Error);
             }
             else
             {
-                var status = info.Status;
-
-                Debug.WriteLine("SongInfo: " + info.Keyword + " status:" + info.Status);
+                var song = info.SongInfo;
+                string tipsStr = null;
+                switch (status)
+                {
+                    case DemandSongStatus.Queue:
+                        tipsStr = "等待处理";
+                        break;
+                    case DemandSongStatus.Search:
+                        tipsStr = "搜索中";
+                        break;
+                    case DemandSongStatus.GetDetail:
+                        tipsStr = "获取信息中"; 
+                        break;
+                    case DemandSongStatus.Download:
+                        tipsStr = "下载中";
+                        item.SubItems[1].Text = song.Name;
+                        break;
+                    case DemandSongStatus.WaitPlay:
+                        tipsStr = "等待播放";
+                        break;
+                    case DemandSongStatus.Playing:
+                        tipsStr = "播放中";
+                        break;
+                    case DemandSongStatus.PlayEnd:
+                        tipsStr = "播放完毕";
+                        break;
+                    default:
+                        break;
+                }
+                if (tipsStr != null)
+                {
+                    item.Text = tipsStr;
+                }
+                Debug.WriteLine("SongInfo: " + info.Keyword + " status:" + status);
             }
         }
 

@@ -45,7 +45,6 @@ namespace WindMusicApp
         private int timeout = 10000; //ms
         private string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36";
         private string m_saveFolder = "";
-        private string m_defaultFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
         private readonly string m_tmpFileExtName = ".tmp";
         ///<summary>  
@@ -53,7 +52,7 @@ namespace WindMusicApp
         ///</summary>  
         public WebClient()
         {
-
+            System.Net.ServicePointManager.DefaultConnectionLimit = 50;
         }
 
         public string UserAgent
@@ -85,6 +84,30 @@ namespace WindMusicApp
             set { referer = value; }
             get { return referer; }
         }
+
+        public void clearTmpFile()
+        {
+            DirectoryInfo TheFolder = new DirectoryInfo(m_saveFolder);
+            foreach (FileInfo NextFile in TheFolder.GetFiles())
+            {
+                var extName = NextFile.Extension;
+
+                if (extName == m_tmpFileExtName)
+                {
+                    File.Delete(NextFile.FullName);
+                }
+            }
+        }
+
+        public void clearAllFile()
+        {
+            DirectoryInfo TheFolder = new DirectoryInfo(m_saveFolder);
+            foreach (FileInfo NextFile in TheFolder.GetFiles())
+            {
+                File.Delete(NextFile.Name);
+            }
+        }
+
         private HttpWebRequest CreateRequest(string url, string method)
         {
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
@@ -244,23 +267,38 @@ namespace WindMusicApp
             var urlStr = url.AbsoluteUri;
             string fileName = webClient.m_saveFolder + urlStr.Substring(urlStr.LastIndexOf("/") + 1);
             string tmpFileName = fileName + webClient.m_tmpFileExtName;
+
             bool isError = false;
+            if (File.Exists(fileName))
+            {
+                Debug.WriteLine("Error: file already exist:" + fileName);
+                isError = true;
+            }
+            if (File.Exists(tmpFileName))
+            {
+                Debug.WriteLine("Error: tmp file already exist:" + tmpFileName);
+                isError = true;
+            }
+            
             try
             {
-                response = (HttpWebResponse)request.EndGetResponse(ar);
-                stream = response.GetResponseStream();
-
-                byte[] buffer = new byte[32 * 1024];
-                int bytesProcessed = 0;
-                fs = File.Create(tmpFileName);
-                int bytesRead;
-                do
+                if (!isError)
                 {
-                    bytesRead = stream.Read(buffer, 0, buffer.Length);
-                    fs.Write(buffer, 0, bytesRead);
-                    bytesProcessed += bytesRead;
+                    response = (HttpWebResponse)request.EndGetResponse(ar);
+                    stream = response.GetResponseStream();
+
+                    byte[] buffer = new byte[32 * 1024];
+                    int bytesProcessed = 0;
+                    fs = File.Create(tmpFileName);
+                    int bytesRead;
+                    do
+                    {
+                        bytesRead = stream.Read(buffer, 0, buffer.Length);
+                        fs.Write(buffer, 0, bytesRead);
+                        bytesProcessed += bytesRead;
+                    }
+                    while (bytesRead > 0);
                 }
-                while (bytesRead > 0);
 
             }
             catch (Exception exception)

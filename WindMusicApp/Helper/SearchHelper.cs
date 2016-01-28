@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-//using Newtonsoft.Json;
-//using Newtonsoft.Json.Linq;
 
 namespace WindMusicApp
 {
@@ -56,11 +54,16 @@ namespace WindMusicApp
         {
 
             m_invokeObj = invokeObj;
+
+            var saveFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\WindMusic\cache\";
+
             //download
             m_httpClient = new WebClient();
             m_httpClient.Referer = "http://music.163.com/search/";
             m_httpClient.DownloadEvent += new WebClientDownloadEvent(onDownloadEvent);
-            m_httpClient.SaveFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\WindMusic\cache\";
+            m_httpClient.SaveFolder = saveFolder;
+
+            m_httpClient.clearTmpFile(); //清除临时文件
 
             m_searchTypeInfoDic = new Dictionary<UInt32, SearchInfoType>();
 
