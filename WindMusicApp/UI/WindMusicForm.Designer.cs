@@ -113,7 +113,7 @@
             // 
             this.notifyIconMin.ContextMenuStrip = this.menuNotify;
             resources.ApplyResources(this.notifyIconMin, "notifyIconMin");
-            this.notifyIconMin.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIconMin_MouseDoubleClick);
+            this.notifyIconMin.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIconMin_MouseClick);
             // 
             // menuNotify
             // 

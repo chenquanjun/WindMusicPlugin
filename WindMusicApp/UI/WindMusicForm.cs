@@ -78,8 +78,12 @@ namespace WindMusicApp
             m_musicControl.DemandInfoEvent += new MusicEventDemandInfoHandler(onDemandInfo);
 
             //button state
-            buttonDelete.Enabled = false; 
+            buttonDelete.Enabled = false;
 
+
+            int x = Screen.PrimaryScreen.WorkingArea.Left + 20;
+            int y = Screen.PrimaryScreen.WorkingArea.Top + 20;
+            this.Location = new Point(x, y);
         }
 
 
@@ -384,34 +388,27 @@ namespace WindMusicApp
             }
         }
 
-        private void notifyIconMin_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (this.WindowState == FormWindowState.Normal)
-            {
-                HideMainForm();
-            }
-            else if (this.WindowState == FormWindowState.Minimized)
-            {
-                ShowMainForm();
-            }
-        }
-
-        private void HideMainForm()
-        {
-            this.WindowState = FormWindowState.Minimized;
-            this.Hide();
-        }
-
-        private void ShowMainForm()
-        {
-            this.Show();
-            this.WindowState = FormWindowState.Normal;
-            this.Activate();
-        }
 
         private void menuNotifyItemSetting_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void notifyIconMin_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Show();
+                this.WindowState = FormWindowState.Normal;
+
+            }
+
+            int x = Screen.PrimaryScreen.WorkingArea.Left + 20;
+            int y = Screen.PrimaryScreen.WorkingArea.Top + 20;
+            this.Location = new Point(x, y);
+
+            this.Activate();
+            this.BringToFront();
         }
 
     }

@@ -187,12 +187,6 @@
   <metadata name="timerMusic.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <data name="columnHeader1.Text" xml:space="preserve">
-    <value>音乐文件路径(支持拖放)</value>
-  </data>
-  <data name="columnHeader1.Width" type="System.Int32, mscorlib">
-    <value>282</value>
-  </data>
   <data name="listViewFolder.LabelWrap" type="System.Boolean, mscorlib">
     <value>False</value>
   </data>
@@ -216,6 +210,12 @@
   </data>
   <data name="&gt;&gt;listViewFolder.ZOrder" xml:space="preserve">
     <value>5</value>
+  </data>
+  <data name="columnHeader1.Text" xml:space="preserve">
+    <value>音乐文件路径(支持拖放)</value>
+  </data>
+  <data name="columnHeader1.Width" type="System.Int32, mscorlib">
+    <value>282</value>
   </data>
   <data name="buttonAdd.Location" type="System.Drawing.Point, System.Drawing">
     <value>372, 124</value>
@@ -295,12 +295,6 @@
   <metadata name="menuNotify.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>271, 17</value>
   </metadata>
-  <data name="menuNotifyItemSetting.Size" type="System.Drawing.Size, System.Drawing">
-    <value>100, 22</value>
-  </data>
-  <data name="menuNotifyItemSetting.Text" xml:space="preserve">
-    <value>设置</value>
-  </data>
   <data name="menuNotify.Size" type="System.Drawing.Size, System.Drawing">
     <value>101, 26</value>
   </data>
@@ -482,23 +476,11 @@
   <data name="notifyIconMin.Visible" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="headerStatus.Text" xml:space="preserve">
-    <value>状态</value>
+  <data name="menuNotifyItemSetting.Size" type="System.Drawing.Size, System.Drawing">
+    <value>100, 22</value>
   </data>
-  <data name="headerStatus.Width" type="System.Int32, mscorlib">
-    <value>70</value>
-  </data>
-  <data name="headerName.Text" xml:space="preserve">
-    <value>名字</value>
-  </data>
-  <data name="headerName.Width" type="System.Int32, mscorlib">
-    <value>86</value>
-  </data>
-  <data name="headerUser.Text" xml:space="preserve">
-    <value>用户</value>
-  </data>
-  <data name="headerUser.Width" type="System.Int32, mscorlib">
-    <value>74</value>
+  <data name="menuNotifyItemSetting.Text" xml:space="preserve">
+    <value>设置</value>
   </data>
   <data name="listViewMusic.Location" type="System.Drawing.Point, System.Drawing">
     <value>12, 53</value>
@@ -520,6 +502,24 @@
   </data>
   <data name="&gt;&gt;listViewMusic.ZOrder" xml:space="preserve">
     <value>1</value>
+  </data>
+  <data name="headerStatus.Text" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="headerStatus.Width" type="System.Int32, mscorlib">
+    <value>70</value>
+  </data>
+  <data name="headerName.Text" xml:space="preserve">
+    <value>名字</value>
+  </data>
+  <data name="headerName.Width" type="System.Int32, mscorlib">
+    <value>86</value>
+  </data>
+  <data name="headerUser.Text" xml:space="preserve">
+    <value>用户</value>
+  </data>
+  <data name="headerUser.Width" type="System.Int32, mscorlib">
+    <value>74</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
