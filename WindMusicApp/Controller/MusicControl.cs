@@ -111,6 +111,27 @@ namespace WindMusicApp
             }
         }
 
+        private bool isKeywordExist(string keyword)
+        {
+            //首先判断是否在歌曲列表
+            var isExistQue = m_demandMusicQue.IsKeywordExist(keyword);
+
+            if (isExistQue){return true; }
+
+            //再判断是否在待处理列表
+            for (int i = 0; i < m_tmpDemandQue.Count; i++)
+            {
+                var tmpInfo = (DemandInfo)m_tmpDemandQue[i];
+                if (tmpInfo.Keyword == keyword)
+                {
+                    isExistQue = true;
+                    break;
+                }
+            }
+
+            return isExistQue;
+        }
+
         private void onPlayDuration(UInt32 queueId, double curDur, double totalDur)
         {
 
@@ -160,9 +181,21 @@ namespace WindMusicApp
                     }
                     else //获取详细信息
                     {
-                        demandInfo.Status = DemandSongStatus.GetDetail;
-                        postDemandInfo(demandInfo);
-                        m_searchHelper.GetSongDetail(songInfo, queueId);
+                        var songId = songInfo.Id;
+                        var isSongIdExist = m_demandMusicQue.IsSongIdExist(songId, queueId);
+
+                        if (isSongIdExist)
+                        {
+                            isRemove = true;
+                            demandInfo.Error = DemandSongError.Repeat;
+                        }
+                        else
+                        {
+                            demandInfo.Status = DemandSongStatus.GetDetail;
+                            postDemandInfo(demandInfo);
+                            m_searchHelper.GetSongDetail(songInfo, queueId);
+                        }
+
                     }
 
                     break;
@@ -263,6 +296,14 @@ namespace WindMusicApp
             if (keyword.Length == 0)
             {
                 Debug.WriteLine("Warning: no keyword:" + keyword);
+                return;
+            }
+
+            var isExist = isKeywordExist(keyword);
+
+            if (isExist)
+            {
+                Debug.WriteLine("Warning: keyword already exist:" + keyword);
                 return;
             }
 

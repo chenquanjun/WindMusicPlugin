@@ -27,6 +27,7 @@ namespace WindMusicApp
         GetDetail = 3, //获取失败
         Download = 4, //下载失败
         Cancel = 5, //用户取消
+        Repeat = 6, //重复
     }
 
     public class DemandInfo

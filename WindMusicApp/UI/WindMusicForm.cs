@@ -132,6 +132,9 @@ namespace WindMusicApp
                     case DemandSongError.Cancel:
                         tipsStr = "取消";
                         break;
+                    case DemandSongError.Repeat:
+                        tipsStr = "重复";
+                        break;
                     default:
                         break;
                 }

@@ -38,6 +38,45 @@ namespace WindMusicApp
             GetInfo(queueId, true);
         }
 
+        public bool IsKeywordExist(string keyword)
+        {
+            //keyword 检查发生在搜索之前
+            bool isExist = false;
+            for (int i = 0; i < m_demandMusicQue.Count; i++)
+            {
+                var tmpInfo = (DemandInfo)m_demandMusicQue[i];
+                if (tmpInfo.Keyword == keyword)
+                {
+                    isExist = true;
+                    break;
+                }
+            }
+            return isExist;
+        }
+
+        public bool IsSongIdExist(UInt32 songId, UInt32 stopQueueId)
+        {
+            Debug.Assert(stopQueueId != 0, "queueid should not be zero");
+            //songId 检查发生在搜索之后，获取资料之前，此时已加入队列，因此有stop queue id
+            bool isExist = false;
+
+            for (int i = 0; i < m_demandMusicQue.Count; i++)
+            {
+                var tmpInfo = (DemandInfo)m_demandMusicQue[i];
+                if (tmpInfo.QueueId == stopQueueId) //找到自己了，跳出循环
+                {
+                    break;
+                }
+                var songInfo = tmpInfo.SongInfo;
+                if (songInfo != null && songInfo.Id == songId)
+                {
+                    isExist = true;
+                    break;
+                }
+            }
+            return isExist;
+        }
+
         public DemandInfo GetInfo(UInt32 queueId, bool isRemove = false)
         {
             DemandInfo info = null;
