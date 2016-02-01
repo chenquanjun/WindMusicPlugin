@@ -144,7 +144,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;textBox1.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>9</value>
   </data>
   <data name="axWindowsMediaPlayer1.Enabled" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -182,11 +182,17 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;axWindowsMediaPlayer1.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>8</value>
   </data>
   <metadata name="timerMusic.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="columnHeader1.Text" xml:space="preserve">
+    <value>音乐文件路径(支持拖放)</value>
+  </data>
+  <data name="columnHeader1.Width" type="System.Int32, mscorlib">
+    <value>282</value>
+  </data>
   <data name="listViewFolder.LabelWrap" type="System.Boolean, mscorlib">
     <value>False</value>
   </data>
@@ -209,13 +215,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;listViewFolder.ZOrder" xml:space="preserve">
-    <value>5</value>
-  </data>
-  <data name="columnHeader1.Text" xml:space="preserve">
-    <value>音乐文件路径(支持拖放)</value>
-  </data>
-  <data name="columnHeader1.Width" type="System.Int32, mscorlib">
-    <value>282</value>
+    <value>7</value>
   </data>
   <data name="buttonAdd.Location" type="System.Drawing.Point, System.Drawing">
     <value>372, 124</value>
@@ -239,7 +239,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;buttonAdd.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>6</value>
   </data>
   <data name="buttonDelete.Location" type="System.Drawing.Point, System.Drawing">
     <value>372, 170</value>
@@ -263,7 +263,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;buttonDelete.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>5</value>
   </data>
   <data name="buttonSearch.Location" type="System.Drawing.Point, System.Drawing">
     <value>278, 13</value>
@@ -287,7 +287,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;buttonSearch.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>4</value>
   </data>
   <metadata name="notifyIconMin.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>135, 17</value>
@@ -295,6 +295,12 @@
   <metadata name="menuNotify.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>271, 17</value>
   </metadata>
+  <data name="menuNotifyItemSetting.Size" type="System.Drawing.Size, System.Drawing">
+    <value>100, 22</value>
+  </data>
+  <data name="menuNotifyItemSetting.Text" xml:space="preserve">
+    <value>设置</value>
+  </data>
   <data name="menuNotify.Size" type="System.Drawing.Size, System.Drawing">
     <value>101, 26</value>
   </data>
@@ -476,11 +482,23 @@
   <data name="notifyIconMin.Visible" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="menuNotifyItemSetting.Size" type="System.Drawing.Size, System.Drawing">
-    <value>100, 22</value>
+  <data name="headerStatus.Text" xml:space="preserve">
+    <value>状态</value>
   </data>
-  <data name="menuNotifyItemSetting.Text" xml:space="preserve">
-    <value>设置</value>
+  <data name="headerStatus.Width" type="System.Int32, mscorlib">
+    <value>70</value>
+  </data>
+  <data name="headerName.Text" xml:space="preserve">
+    <value>名字</value>
+  </data>
+  <data name="headerName.Width" type="System.Int32, mscorlib">
+    <value>86</value>
+  </data>
+  <data name="headerUser.Text" xml:space="preserve">
+    <value>用户</value>
+  </data>
+  <data name="headerUser.Width" type="System.Int32, mscorlib">
+    <value>74</value>
   </data>
   <data name="listViewMusic.Location" type="System.Drawing.Point, System.Drawing">
     <value>12, 53</value>
@@ -501,25 +519,58 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;listViewMusic.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="buttonLocal.Location" type="System.Drawing.Point, System.Drawing">
+    <value>278, 43</value>
+  </data>
+  <data name="buttonLocal.Size" type="System.Drawing.Size, System.Drawing">
+    <value>75, 23</value>
+  </data>
+  <data name="buttonLocal.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
+  </data>
+  <data name="buttonLocal.Text" xml:space="preserve">
+    <value>local</value>
+  </data>
+  <data name="&gt;&gt;buttonLocal.Name" xml:space="preserve">
+    <value>buttonLocal</value>
+  </data>
+  <data name="&gt;&gt;buttonLocal.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;buttonLocal.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;buttonLocal.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
-  <data name="headerStatus.Text" xml:space="preserve">
-    <value>状态</value>
+  <data name="labelDuration.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
   </data>
-  <data name="headerStatus.Width" type="System.Int32, mscorlib">
-    <value>70</value>
+  <data name="labelDuration.Location" type="System.Drawing.Point, System.Drawing">
+    <value>278, 327</value>
   </data>
-  <data name="headerName.Text" xml:space="preserve">
-    <value>名字</value>
+  <data name="labelDuration.Size" type="System.Drawing.Size, System.Drawing">
+    <value>41, 12</value>
   </data>
-  <data name="headerName.Width" type="System.Int32, mscorlib">
-    <value>86</value>
+  <data name="labelDuration.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
   </data>
-  <data name="headerUser.Text" xml:space="preserve">
-    <value>用户</value>
+  <data name="labelDuration.Text" xml:space="preserve">
+    <value>label1</value>
   </data>
-  <data name="headerUser.Width" type="System.Int32, mscorlib">
-    <value>74</value>
+  <data name="&gt;&gt;labelDuration.Name" xml:space="preserve">
+    <value>labelDuration</value>
+  </data>
+  <data name="&gt;&gt;labelDuration.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;labelDuration.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;labelDuration.ZOrder" xml:space="preserve">
+    <value>0</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>

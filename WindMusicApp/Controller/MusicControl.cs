@@ -37,6 +37,8 @@ namespace WindMusicApp
 
         private ArrayList m_localMusicFolderNames; //本地目录列表
         private ArrayList m_localMusicList; //本地音乐列表
+        private int m_localMusicIdx;
+
         private Dictionary<string, bool> m_musicExtDic; //音乐扩展名字典
 
         private DemandQueue m_demandMusicQue; //点歌音乐队列
@@ -50,6 +52,7 @@ namespace WindMusicApp
         public event MusicEventRemoveFolderHandler RemoveFolderEvent;
 
         public event MusicEventDemandInfoHandler DemandInfoEvent;
+        public event MusicEventDemandInfoDurationHandler DemandInfoDurationEvent;
 
         
         private readonly string m_demandFormatStr = "点歌 ";
@@ -61,6 +64,7 @@ namespace WindMusicApp
             //init
             m_localMusicFolderNames = new ArrayList();
             m_localMusicList = new ArrayList();
+            m_localMusicIdx = -1;
             m_demandMusicQue = new DemandQueue(maxNum);
             m_tmpDemandQue = new ArrayList();
 
@@ -134,15 +138,19 @@ namespace WindMusicApp
 
         private void onPlayDuration(UInt32 queueId, double curDur, double totalDur)
         {
-
+            if (DemandInfoDurationEvent != null)
+            {
+                DemandInfoDurationEvent(queueId, curDur, totalDur);
+            }
         }
 
-        private void tryPlayMusic()
+        public void tryPlayMusic()
         {
             //尝试播放音乐
             var firstInfo = m_demandMusicQue.First();
-            if (firstInfo != null)//点歌模式
+            if (firstInfo != null)
             {
+                m_curMusicMode = MusicMode.DemandMusic; //点歌模式
                 if (firstInfo.Status == DemandSongStatus.WaitPlay) //队列第一个刚好是等待播放状态
                 {
                     m_musicPlayer.Play(firstInfo.QueueId, firstInfo.SongInfo.FileName);
@@ -151,7 +159,46 @@ namespace WindMusicApp
             }
             else //自定义音乐播放模式
             {
+                var musicNum = m_localMusicList.Count;
 
+                if (musicNum == 0)
+                {
+                    m_curMusicMode = MusicMode.Invalid; //无效状态
+                    return;
+                }
+
+                m_curMusicMode = MusicMode.LocalMusic; //本地音乐
+
+                var musicIdx = -1;
+
+                if (m_localMusicIdx == -1) //初始化
+                {
+                    musicIdx = 0;
+                }
+                else
+                {
+                    musicIdx = m_localMusicIdx + 1; //下一曲
+                    if (musicIdx >= musicNum) //循环
+                    {
+                        musicIdx = 0;
+                    }
+                }
+
+                m_localMusicIdx = musicIdx;
+
+                string fileName =(string)m_localMusicList[musicIdx];
+                string musicName = Path.GetFileNameWithoutExtension(fileName);
+                var demandInfo = new DemandInfo();
+                demandInfo.Keyword = musicName;
+                demandInfo.QueueId = genQueueId();
+                demandInfo.UserName = "本地歌曲";
+                demandInfo.Status = DemandSongStatus.WaitPlay;
+                demandInfo.IsLocalMusic = true;
+                demandInfo.SongInfo = new Song(null) { Id = 0, FileName = fileName, Name = musicName};
+                m_demandMusicQue.Add(demandInfo);
+                postDemandInfo(demandInfo);
+
+                m_musicPlayer.Play(demandInfo.QueueId, fileName);
             }
         }
 
@@ -360,6 +407,7 @@ namespace WindMusicApp
                 m_demandMusicQue.Add(queData);
                 postDemandInfo(queData);
                 m_searchHelper.SearchSong(queData.Keyword, queData.QueueId);
+
             }
 
             if (isKeepOn)
@@ -468,6 +516,8 @@ namespace WindMusicApp
                     }
                 }
             }
+
+            m_localMusicIdx = -1;
         }
     }
 }

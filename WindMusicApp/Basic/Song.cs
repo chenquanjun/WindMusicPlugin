@@ -27,6 +27,11 @@ namespace WindMusicApp
 
         public SongQuality(JObject jo)
         {
+            if (jo == null)
+            {
+                return;
+            }
+
             UInt32 id;
             UInt32.TryParse(jo["id"].ToString(), out id);
             Id = id;
@@ -56,6 +61,11 @@ namespace WindMusicApp
     {
         public Song(JObject jo)
         {
+            if (jo == null)
+            {
+                return;
+            }
+
             UInt32 id;
             UInt32.TryParse(jo["id"].ToString(), out id);
             Id = id;

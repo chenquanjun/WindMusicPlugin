@@ -45,6 +45,8 @@
             this.headerStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.headerName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.headerUser = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.buttonLocal = new System.Windows.Forms.Button();
+            this.labelDuration = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.axWindowsMediaPlayer1)).BeginInit();
             this.menuNotify.SuspendLayout();
             this.SuspendLayout();
@@ -152,10 +154,24 @@
             // 
             resources.ApplyResources(this.headerUser, "headerUser");
             // 
+            // buttonLocal
+            // 
+            resources.ApplyResources(this.buttonLocal, "buttonLocal");
+            this.buttonLocal.Name = "buttonLocal";
+            this.buttonLocal.UseVisualStyleBackColor = true;
+            this.buttonLocal.Click += new System.EventHandler(this.buttonLocal_Click);
+            // 
+            // labelDuration
+            // 
+            resources.ApplyResources(this.labelDuration, "labelDuration");
+            this.labelDuration.Name = "labelDuration";
+            // 
             // WindMusicForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.labelDuration);
+            this.Controls.Add(this.buttonLocal);
             this.Controls.Add(this.listViewMusic);
             this.Controls.Add(this.buttonSearch);
             this.Controls.Add(this.buttonDelete);
@@ -196,6 +212,8 @@
         private System.Windows.Forms.ColumnHeader headerStatus;
         private System.Windows.Forms.ColumnHeader headerName;
         private System.Windows.Forms.ColumnHeader headerUser;
+        private System.Windows.Forms.Button buttonLocal;
+        private System.Windows.Forms.Label labelDuration;
     }
 }
 

@@ -76,6 +76,7 @@ namespace WindMusicApp
             m_musicControl.AddFolderEvent += new MusicEventAddFolderHandler(onAddFolderEvent);
             m_musicControl.RemoveFolderEvent += new MusicEventRemoveFolderHandler(onRemoveFolderEvent);
             m_musicControl.DemandInfoEvent += new MusicEventDemandInfoHandler(onDemandInfo);
+            m_musicControl.DemandInfoDurationEvent += new MusicEventDemandInfoDurationHandler(onDemandInfoDuration);
 
             //button state
             buttonDelete.Enabled = false;
@@ -85,7 +86,10 @@ namespace WindMusicApp
             int y = Screen.PrimaryScreen.WorkingArea.Top + 20;
             this.Location = new Point(x, y);
         }
-
+        private void onDemandInfoDuration(UInt32 queueId, double curDur, double totalDur)
+        {
+            labelDuration.Text = curDur + ":" + totalDur;
+        }
 
         private void onDemandInfo(DemandInfo info)
         {
@@ -97,11 +101,7 @@ namespace WindMusicApp
 
             if (item == null)
             {
-                if (status != DemandSongStatus.Queue) //已经被删除
-                {
-                    return;
-                }
-                else //初始化
+                if (status == DemandSongStatus.Queue || (info.IsLocalMusic == true && status == DemandSongStatus.WaitPlay)) 
                 {
                     item = new ListViewItem();
                     item.Name = queueId;
@@ -109,6 +109,10 @@ namespace WindMusicApp
                     item.SubItems.Add(info.UserName);
 
                     listViewMusic.Items.Add(item);
+                }
+                else //初始化
+                {
+                    return;
                 }
             }
 
@@ -409,6 +413,11 @@ namespace WindMusicApp
 
             this.Activate();
             this.BringToFront();
+        }
+
+        private void buttonLocal_Click(object sender, EventArgs e)
+        {
+            m_musicControl.tryPlayMusic();
         }
 
     }

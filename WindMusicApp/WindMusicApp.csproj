@@ -79,6 +79,12 @@
     <Compile Include="Helper\HttpHelper.cs" />
     <Compile Include="Helper\SearchHelper.cs" />
     <Compile Include="Basic\Song.cs" />
+    <Compile Include="UI\SettingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\SettingForm.Designer.cs">
+      <DependentUpon>SettingForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Util\Util.cs" />
     <Compile Include="UI\WindMusicForm.cs">
       <SubType>Form</SubType>
@@ -97,6 +103,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="UI\SettingForm.resx">
+      <DependentUpon>SettingForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\WindMusicForm.resx">
       <DependentUpon>WindMusicForm.cs</DependentUpon>
     </EmbeddedResource>

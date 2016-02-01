@@ -35,6 +35,7 @@ namespace WindMusicApp
         public DemandInfo()
         {
             Error = DemandSongError.Invalid;
+            IsLocalMusic = false;
         }
 
         public string UserName { get; set; }
@@ -44,6 +45,8 @@ namespace WindMusicApp
         public UInt32 QueueId { get; set; }
 
         public Song SongInfo { get; set; }
+
+        public bool IsLocalMusic { get; set; }
 
         public DemandSongStatus Status { get; set; }
 
