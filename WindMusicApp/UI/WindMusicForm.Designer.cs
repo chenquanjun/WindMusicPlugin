@@ -47,6 +47,7 @@
             this.headerUser = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.buttonLocal = new System.Windows.Forms.Button();
             this.labelDuration = new System.Windows.Forms.Label();
+            this.buttonDeleteSong = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.axWindowsMediaPlayer1)).BeginInit();
             this.menuNotify.SuspendLayout();
             this.SuspendLayout();
@@ -141,6 +142,7 @@
             this.listViewMusic.Name = "listViewMusic";
             this.listViewMusic.UseCompatibleStateImageBehavior = false;
             this.listViewMusic.View = System.Windows.Forms.View.Details;
+            this.listViewMusic.SelectedIndexChanged += new System.EventHandler(this.listViewMusic_SelectedIndexChanged);
             // 
             // headerStatus
             // 
@@ -166,10 +168,18 @@
             resources.ApplyResources(this.labelDuration, "labelDuration");
             this.labelDuration.Name = "labelDuration";
             // 
+            // buttonDeleteSong
+            // 
+            resources.ApplyResources(this.buttonDeleteSong, "buttonDeleteSong");
+            this.buttonDeleteSong.Name = "buttonDeleteSong";
+            this.buttonDeleteSong.UseVisualStyleBackColor = true;
+            this.buttonDeleteSong.Click += new System.EventHandler(this.buttonDeleteSong_Click);
+            // 
             // WindMusicForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.buttonDeleteSong);
             this.Controls.Add(this.labelDuration);
             this.Controls.Add(this.buttonLocal);
             this.Controls.Add(this.listViewMusic);
@@ -214,6 +224,7 @@
         private System.Windows.Forms.ColumnHeader headerUser;
         private System.Windows.Forms.Button buttonLocal;
         private System.Windows.Forms.Label labelDuration;
+        private System.Windows.Forms.Button buttonDeleteSong;
     }
 }
 

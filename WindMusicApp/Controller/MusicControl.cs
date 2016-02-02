@@ -93,14 +93,18 @@ namespace WindMusicApp
         private void onPlayState(UInt32 queueId, MusicPlayState playState)
         {
             var demandInfo = m_demandMusicQue.GetInfo(queueId);
-            Debug.Assert(demandInfo != null, "should exist demand info:" + queueId + " state:" + playState);
+            if (demandInfo == null)
+            {
+                Debug.WriteLine("Play state: already remove " + queueId);
+                return;
+            }
 
             switch (playState)
             {
                 case MusicPlayState.Stop:
                     demandInfo.Status = DemandSongStatus.PlayEnd;
-                    removeDemandInfo(demandInfo);
-                    tryPlayMusic();
+                    removeDemandInfo(demandInfo); //删除
+                    tryPlayMusic(); //尝试播放下一个
                     break;
                 case MusicPlayState.Pause:
                     break;
@@ -141,6 +145,53 @@ namespace WindMusicApp
             if (DemandInfoDurationEvent != null)
             {
                 DemandInfoDurationEvent(queueId, curDur, totalDur);
+            }
+        }
+
+        public void OnDeleteSong(UInt32 queueId)
+        {
+            var demandInfo = m_demandMusicQue.GetInfo(queueId);
+
+            if (demandInfo == null) { Debug.WriteLine("On delete null song:" + queueId); return; }
+
+            if (demandInfo.isError()) { Debug.WriteLine("On delete error song:" + queueId); return; }
+
+            
+            var status = demandInfo.Status;
+            Debug.WriteLine("On delete song:" + queueId + " status:" + status);
+            var isCancelNet = false;
+
+            switch (status)
+            {
+                case DemandSongStatus.Search:
+                    isCancelNet = true;
+                    break;
+                case DemandSongStatus.GetDetail:
+                    isCancelNet = true;
+                    break;
+                case DemandSongStatus.Download:
+                    isCancelNet = true;
+                    break;
+                case DemandSongStatus.WaitPlay:
+                    demandInfo.Error = DemandSongError.Cancel;
+                    removeDemandInfo(demandInfo);
+
+                    break;
+                case DemandSongStatus.Playing:
+                    demandInfo.Error = DemandSongError.Cancel;
+                    removeDemandInfo(demandInfo);
+                    m_musicPlayer.Stop(queueId);
+                    tryPlayMusic();
+                    break;
+                default:
+                    break;
+            }
+
+            if (isCancelNet)
+            {
+                demandInfo.Error = DemandSongError.Cancel;
+                removeDemandInfo(demandInfo);
+                tryFinishQueue(queueId);//完成队列
             }
         }
 
@@ -186,6 +237,7 @@ namespace WindMusicApp
 
                 m_localMusicIdx = musicIdx;
 
+                //生成信息
                 string fileName =(string)m_localMusicList[musicIdx];
                 string musicName = Path.GetFileNameWithoutExtension(fileName);
                 var demandInfo = new DemandInfo();
@@ -195,9 +247,10 @@ namespace WindMusicApp
                 demandInfo.Status = DemandSongStatus.WaitPlay;
                 demandInfo.IsLocalMusic = true;
                 demandInfo.SongInfo = new Song(null) { Id = 0, FileName = fileName, Name = musicName};
+                //加入队列
                 m_demandMusicQue.Add(demandInfo);
                 postDemandInfo(demandInfo);
-
+                //播放音乐
                 m_musicPlayer.Play(demandInfo.QueueId, fileName);
             }
         }
@@ -213,6 +266,11 @@ namespace WindMusicApp
             var status = DemandSongStatus.Invalid;
             if (demandInfo != null)
             {
+                if (demandInfo.Error == DemandSongError.Cancel) //用户取消
+                {
+                    return;
+                }
+
                 status = demandInfo.Status;
             }
 
@@ -231,7 +289,7 @@ namespace WindMusicApp
                         var songId = songInfo.Id;
                         var isSongIdExist = m_demandMusicQue.IsSongIdExist(songId, queueId);
 
-                        if (isSongIdExist)
+                        if (isSongIdExist) //重复了
                         {
                             isRemove = true;
                             demandInfo.Error = DemandSongError.Repeat;
@@ -304,6 +362,11 @@ namespace WindMusicApp
 
         private void removeDemandInfo(DemandInfo info)
         {
+            if (info == null)
+            {
+                return;
+            }
+
             //删除点歌信息
             if (DemandInfoEvent != null)
             {
@@ -372,7 +435,7 @@ namespace WindMusicApp
 
         private void postDemandInfo(DemandInfo info)
         {
-            if (DemandInfoEvent != null)
+            if (DemandInfoEvent != null && info != null)
             {
                 DemandInfoEvent(info);
             }
@@ -394,7 +457,7 @@ namespace WindMusicApp
 
             var isKeepOn = false;
 
-            if (isFull) //点歌队列满了，继续处理下一个数据
+            if (isFull) //点歌队列满了，继续下一个数据
             {
                 isKeepOn = true;
                 queData.Error = DemandSongError.Full;
@@ -422,37 +485,6 @@ namespace WindMusicApp
             var queueId = m_queueIdOrder;
             m_queueIdOrder += 1;
             return queueId;
-        }
-
-        private void setMusicMode(MusicMode mode)
-        {
-            if (mode == m_curMusicMode)
-            {
-                return;
-            }
-
-            //旧的模式取消
-            switch (m_curMusicMode)
-            {
-                case MusicMode.LocalMusic:
-                    break;
-                case MusicMode.DemandMusic:
-                    break;
-                default:
-                    break;
-            }
-
-            //新的模式切换
-            switch (mode)
-            {
-                case MusicMode.LocalMusic:
-
-                    break;
-                case MusicMode.DemandMusic:
-                    break;
-                default:
-                    break;
-            }
         }
 
         public bool AddMusicFolder(string folderName)

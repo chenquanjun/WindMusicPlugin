@@ -151,9 +151,13 @@ namespace WindMusicApp
             m_mediaPlayer.Ctlcontrols.pause();
         }
 
-        public void Stop()
+        public void Stop(UInt32 playId)
         {
-            m_mediaPlayer.Ctlcontrols.stop();
+            if (playId == m_curPlayId)
+            {
+                m_mediaPlayer.Ctlcontrols.stop(); //等待回调
+            }
+            
         }
 
         public double totalTime()

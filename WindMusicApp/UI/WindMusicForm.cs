@@ -80,6 +80,7 @@ namespace WindMusicApp
 
             //button state
             buttonDelete.Enabled = false;
+            buttonDeleteSong.Enabled = false;
 
 
             int x = Screen.PrimaryScreen.WorkingArea.Left + 20;
@@ -418,6 +419,29 @@ namespace WindMusicApp
         private void buttonLocal_Click(object sender, EventArgs e)
         {
             m_musicControl.tryPlayMusic();
+        }
+
+        private void listViewMusic_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var focusedItem = listViewMusic.FocusedItem;
+            buttonDeleteSong.Enabled = focusedItem.Selected;
+        }
+
+        private void buttonDeleteSong_Click(object sender, EventArgs e)
+        {
+            var selectItems = listViewMusic.SelectedItems;
+            var count = selectItems.Count;
+            if (count > 0)
+            {
+                var selectItem = selectItems[0];
+                var queueIdStr = selectItem.Name;
+                UInt32 queueId;
+                if (UInt32.TryParse(queueIdStr, out queueId))
+                {
+                    m_musicControl.OnDeleteSong(queueId);
+                }
+            }
+            buttonDeleteSong.Enabled = false;
         }
 
     }
